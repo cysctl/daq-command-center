@@ -11,7 +11,7 @@
 	<div class="flex items-center gap-4">
 		<SystemState />
 		<Divider />
-		<ServerConnStatus />
+		<ServerConnStatus connStatus="disconnected" />
 		<Divider />
 		<Operator />
 	</div>

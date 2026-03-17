@@ -6,7 +6,7 @@
 	import Divider from '../ui/divider.svelte';
 </script>
 
-<header class="flex w-full justify-between p-5">
+<header class="flex w-full justify-between border-b border-border p-5">
 	<Logo />
 	<div class="flex items-center gap-4">
 		<SystemState />

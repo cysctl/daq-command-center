@@ -4,7 +4,7 @@
 	import Logs from '$lib/components/Logs/index.svelte';
 </script>
 
-<main class="flex flex-1 p-5">
+<main class="flex flex-1">
 	<Sidebar />
 
 	<div class="flex flex-col">

@@ -1,11 +1,11 @@
 <script lang="ts">
 	// I can edit here later
 	// I can remove some states or add new states
-	export type State = 'NEW' | 'INIT' | 'ORBIT' | 'RUN' | 'SAFE' | 'ERROR' | 'DEAD';
+	export type StateType = 'NEW' | 'INIT' | 'ORBIT' | 'RUN' | 'SAFE' | 'ERROR' | 'DEAD';
 
-	let { state }: { state: State } = $props();
+	let { state }: { state: StateType } = $props();
 
-	const stateStyles: Record<State, string> = {
+	const stateStyles: Record<StateType, string> = {
 		NEW: 'bg-neutral-800 text-neutral-200 border-neutral-600',
 		INIT: 'bg-amber-500/20 text-amber-300 border-amber-500/50',
 		ORBIT: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50',

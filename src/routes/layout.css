@@ -39,3 +39,7 @@
 	--color-sidebar-border: lab(7.22637% -0.0000149012 0);
 	--color-sidebar-ring: lab(30.4% -0.0000149012 0);
 }
+
+body {
+	@apply bg-background font-sans text-foreground;
+}

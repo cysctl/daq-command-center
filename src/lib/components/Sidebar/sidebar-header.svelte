@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Satellite, Plus, X } from '@lucide/svelte';
+	import { Satellite, X, RefreshCw } from '@lucide/svelte';
 
 	type Props = {
 		satelliteCount: number;
@@ -21,7 +21,7 @@
 		<button
 			class="h-fit cursor-pointer rounded-lg p-1 text-muted-foreground transition-colors hover:bg-border active:scale-95"
 		>
-			<Plus size={17} class="cursor-pointer text-muted-foreground" />
+			<RefreshCw size={17} class="cursor-pointer text-muted-foreground" />
 		</button>
 
 		<button

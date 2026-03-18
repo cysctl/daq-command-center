@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { ChevronDown } from '@lucide/svelte';
 	import type { Component } from 'svelte';
 	import { tick } from 'svelte';
 	import * as echarts from 'echarts';
 	import Select from '../ui/select.svelte';
+	import { satellitesStore } from '../../stores/satellites.svelte.ts';
 
 	interface Props {
 		title: string;
@@ -21,8 +21,7 @@
 
 	let selectedOption = $state('Overview');
 
-	// I will replace with actual satellite data source
-	let satelliteOptions = ['Overview', 'Satellite 1'];
+	let satelliteOptions = $derived(['Overview', ...satellitesStore.satellites.map((s) => s.name)]);
 
 	function getChartOption(seriesData: number[], seriesColor: string): echarts.EChartsOption {
 		return {

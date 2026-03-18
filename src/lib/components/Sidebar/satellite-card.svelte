@@ -1,24 +1,36 @@
 <script lang="ts">
 	import State from '../ui/state.svelte';
 	import SatelliteStateButton from './satellite-state-button.svelte';
+	import { satellitesStore, type Satellite } from '../../stores/satellites.svelte.ts';
 
 	import type { StateType } from '../ui/state.svelte';
 
-	let currentState: StateType = $state('INIT');
+	let { satellite }: { satellite: Satellite } = $props();
+
+	let currentState: StateType = $derived(satellite.state);
 
 	let availableStates: StateType[] = ['INIT', 'ORBIT', 'RUN', 'ERROR'];
 </script>
 
 <div class="flex flex-col gap-2 rounded-lg border border-border p-3">
 	<div class="flex justify-between">
-		<span class="font-mono text-sm font-semibold uppercase">Satellite 1</span>
+		<span class="font-mono text-sm font-semibold uppercase">{satellite.name}</span>
 		<State state={currentState} />
 	</div>
 
-	<span class="font-mono text-sm text-muted-foreground uppercase">Type: -</span>
-	<span class="font-mono text-sm text-muted-foreground uppercase">Last Message: -</span>
-	<span class="font-mono text-sm text-muted-foreground uppercase">Heartbeat: -</span>
-	<span class="font-mono text-sm text-muted-foreground uppercase">Lives: -</span>
+	<span class="font-mono text-sm text-muted-foreground uppercase">Type: {satellite.type}</span>
+
+	<!-- the reason for this format is prettier :/ -->
+	<span class="font-mono text-sm text-muted-foreground uppercase"
+		>Last Message: {satellite.lastMessage}</span
+	>
+
+	<!-- the reason for this format is prettier :/ -->
+	<span class="font-mono text-sm text-muted-foreground uppercase"
+		>Heartbeat: {satellite.heartbeat}</span
+	>
+
+	<span class="font-mono text-sm text-muted-foreground uppercase">Lives: {satellite.lives}</span>
 
 	<div class="grid grid-cols-4 gap-2">
 		{#each availableStates as state}
@@ -26,7 +38,7 @@
 				{state}
 				isActive={state === currentState}
 				onclick={() => {
-					currentState = state;
+					satellitesStore.updateSatelliteState(satellite.id, state);
 				}}
 			/>
 		{/each}

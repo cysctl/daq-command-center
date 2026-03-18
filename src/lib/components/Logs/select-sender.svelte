@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Select from '../ui/select.svelte';
+	import { satellitesStore } from '../../stores/satellites.svelte.ts';
 
 	let selectedOption = $state('All');
 
-	// I will replace with actual satellite data source
-	let senderOptions = ['All', 'Satellite 1'];
+	let senderOptions = $derived(['All', ...satellitesStore.satellites.map((s) => s.name)]);
 </script>
 
 <Select

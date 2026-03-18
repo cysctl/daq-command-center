@@ -28,9 +28,13 @@
 	];
 
 	let filteredLogs = $derived(
-		logsState.filter === 'all'
-			? logs
-			: logs.filter((log) => log.level.toLowerCase() === logsState.filter)
+		logs.filter((log) => {
+			const matchesLevel =
+				logsState.filter === 'all' || log.level.toLowerCase() === logsState.filter;
+			const matchesSearch =
+				logsState.searchQuery === '' || log.message.includes(logsState.searchQuery);
+			return matchesLevel && matchesSearch;
+		})
 	);
 </script>
 

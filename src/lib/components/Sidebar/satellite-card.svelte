@@ -15,7 +15,10 @@
 		<State state={currentState} />
 	</div>
 
-	<span class="font-mono text-sm text-muted-foreground uppercase">Uptime: -</span>
+	<span class="font-mono text-sm text-muted-foreground uppercase">Type: -</span>
+	<span class="font-mono text-sm text-muted-foreground uppercase">Last Message: -</span>
+	<span class="font-mono text-sm text-muted-foreground uppercase">Heartbeat: -</span>
+	<span class="font-mono text-sm text-muted-foreground uppercase">Lives: -</span>
 
 	<div class="grid grid-cols-4 gap-2">
 		{#each availableStates as state}

@@ -4,7 +4,7 @@
 	import OperatorNote from './operator-note.svelte';
 </script>
 
-<section class="flex-1 rounded-xl border border-border bg-card p-6 text-card-foreground">
+<section class="flex h-full min-h-[500px] flex-col rounded-xl border border-border bg-card p-4 sm:p-6 text-card-foreground">
 	<LogsHeader />
 	<LogMessagesArea />
 	<OperatorNote />

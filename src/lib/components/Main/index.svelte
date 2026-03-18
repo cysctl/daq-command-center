@@ -28,7 +28,7 @@
 
 	<Sidebar bind:open={sidebarOpen} />
 
-	<div class="flex flex-1 flex-col overflow-auto">
+	<div class="flex flex-1 flex-col gap-5 overflow-auto p-5">
 		<Graphs />
 		<Logs />
 	</div>

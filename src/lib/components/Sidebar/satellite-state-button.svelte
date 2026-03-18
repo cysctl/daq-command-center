@@ -34,7 +34,7 @@
 
 <button
 	{onclick}
-	class="w-full cursor-pointer rounded-lg border py-1 font-mono text-xs font-semibold transition-colors active:scale-95 {isActive
+	class="w-full cursor-pointer rounded-xl border-2 py-1 font-mono text-[0.8rem] font-semibold transition-colors active:scale-95 {isActive
 		? activeStyles[state]
 		: inactiveStyles[state]}"
 >

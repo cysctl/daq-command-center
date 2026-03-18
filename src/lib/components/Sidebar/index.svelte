@@ -3,6 +3,7 @@
 	import SatelliteCard from './satellite-card.svelte';
 	import QuickActionButtons from './quick-action-buttons.svelte';
 	import RunIdentifier from './run-identifier.svelte';
+	import { satellitesStore } from '../../stores/satellites.svelte.ts';
 
 	let { open = $bindable(false) } = $props();
 
@@ -17,10 +18,12 @@
 	class:max-lg:translate-x-0={open}
 >
 	<div class="flex flex-col gap-5">
-		<SidebarHeader satelliteCount={5} onclose={closeSidebar} />
+		<SidebarHeader satelliteCount={satellitesStore.satellites.length} onclose={closeSidebar} />
 		<QuickActionButtons />
 		<div class="flex flex-col gap-7">
-			<SatelliteCard />
+			{#each satellitesStore.satellites as satellite (satellite.id)}
+				<SatelliteCard {satellite} />
+			{/each}
 		</div>
 	</div>
 	<RunIdentifier />

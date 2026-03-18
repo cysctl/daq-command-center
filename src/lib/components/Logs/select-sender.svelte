@@ -1,15 +1,19 @@
 <script lang="ts">
 	import Select from '../ui/select.svelte';
+	import { satellitesStore } from '../../stores/satellites.svelte.ts';
+	import { logsState } from './store.svelte.ts';
 
-	let selectedOption = $state('All');
-
-	// I will replace with actual satellite data source
-	let senderOptions = ['All', 'Satellite 1'];
+	let senderOptions = $derived([
+		'All',
+		'System',
+		'Operator',
+		...satellitesStore.satellites.map((s) => s.name)
+	]);
 </script>
 
 <Select
 	options={senderOptions}
-	bind:selected={selectedOption}
+	bind:selected={logsState.sender}
 	prefix="Sender:"
 	minWidthClass="w-auto min-w-44"
 />

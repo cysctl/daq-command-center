@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { logsState } from './store.svelte';
+
 	const filters: string[] = ['all', 'info', 'warn', 'error'];
-	let selectedFilter = $state('all');
 </script>
 
 <ul class="inline-flex items-center gap-1 rounded-lg border border-border bg-card p-1 shadow-sm">
@@ -8,11 +9,11 @@
 		<li>
 			<button
 				class="cursor-pointer rounded-md px-3 py-1 text-sm capitalize transition-colors outline-none hover:bg-border focus:bg-border"
-				class:bg-border={selectedFilter === filter}
-				class:text-card-foreground={selectedFilter === filter}
-				class:text-muted-foreground={selectedFilter !== filter}
+				class:bg-border={logsState.filter === filter}
+				class:text-card-foreground={logsState.filter === filter}
+				class:text-muted-foreground={logsState.filter !== filter}
 				onclick={() => {
-					selectedFilter = filter;
+					logsState.filter = filter;
 				}}
 			>
 				{filter}

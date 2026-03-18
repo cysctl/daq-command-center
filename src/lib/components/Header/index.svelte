@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Logo from './logo.svelte';
 	import SystemState from './system-state.svelte';
-	import Operator from './operator.svelte';
+	import Settings from './settings.svelte';
 	import ServerConnStatus from './server-conn-status.svelte';
 	import Divider from '../ui/divider.svelte';
 </script>
@@ -13,6 +13,6 @@
 		<Divider />
 		<ServerConnStatus connStatus="disconnected" />
 		<Divider />
-		<Operator />
+		<Settings />
 	</div>
 </header>

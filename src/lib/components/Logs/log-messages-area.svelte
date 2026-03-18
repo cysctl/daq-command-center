@@ -1,5 +1,6 @@
 <script lang="ts">
 	import LogMessage from './log-message.svelte';
+	import { logsState } from './store.svelte';
 
 	// mock data
 	const logs = [
@@ -25,13 +26,24 @@
 			message: 'Adjusting antenna position.'
 		}
 	];
+
+	let filteredLogs = $derived(
+		logs.filter((log) => {
+			const matchesLevel =
+				logsState.filter === 'all' || log.level.toLowerCase() === logsState.filter;
+			const matchesSearch =
+				logsState.searchQuery === '' || log.message.includes(logsState.searchQuery);
+			const matchesSender = logsState.sender === 'All' || log.sender === logsState.sender;
+			return matchesLevel && matchesSearch && matchesSender;
+		})
+	);
 </script>
 
 <div
 	class="my-4 flex-1 overflow-y-auto rounded-md border border-border bg-secondary/10 p-2 font-mono text-sm sm:p-4"
 >
 	<ul class="flex flex-col gap-1.5 sm:gap-1">
-		{#each logs as log}
+		{#each filteredLogs as log}
 			<li>
 				<LogMessage {log} />
 			</li>

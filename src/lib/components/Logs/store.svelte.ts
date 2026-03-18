@@ -1,1 +1,1 @@
-export const logsState = $state({ filter: 'all', searchQuery: '' });
+export const logsState = $state({ filter: 'all', searchQuery: '', sender: 'All' });

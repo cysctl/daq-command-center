@@ -33,7 +33,8 @@
 				logsState.filter === 'all' || log.level.toLowerCase() === logsState.filter;
 			const matchesSearch =
 				logsState.searchQuery === '' || log.message.includes(logsState.searchQuery);
-			return matchesLevel && matchesSearch;
+			const matchesSender = logsState.sender === 'All' || log.sender === logsState.sender;
+			return matchesLevel && matchesSearch && matchesSender;
 		})
 	);
 </script>

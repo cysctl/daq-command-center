@@ -1,4 +1,4 @@
-from fsm import FSM
+from .fsm import FSM
 from datetime import datetime
 
 class Satellite:
@@ -20,6 +20,7 @@ class Satellite:
     
 
     def process_cmd(self, cmd):
+        cmd = cmd.upper()
         try:
             old_state = self.state()
             transition_occurred = False

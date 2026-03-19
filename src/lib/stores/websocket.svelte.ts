@@ -41,7 +41,7 @@ export class WebSocketStore {
 						satellitesStore.setSatellites(mappedSatellites);
 					} else if (data.type === 'SATELLITE_STATE_UPDATE') {
 						const newState = data.new_state ? data.new_state.toUpperCase() : 'INIT';
-						satellitesStore.updateSatelliteState(data.satellite_id, newState);
+						satellitesStore.updateSatelliteState(data.satellite_id, newState, data.last_message);
 					}
 				} catch (err) {
 					console.error('Error parsing WebSocket message:', err);

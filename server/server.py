@@ -51,11 +51,13 @@ async def handler(websocket):
                 
                 success = False
                 current_state = None
+                current_last_message = None
 
                 for sat in system_satellites:
                     if sat.id == satellite_id: # find correct satellite
                         success = sat.process_cmd(new_state) # process through fsm
                         current_state = sat.state()
+                        current_last_message = sat.last_message
                         break
                 
                 if success:
@@ -63,6 +65,7 @@ async def handler(websocket):
                         "type": "SATELLITE_STATE_UPDATE",
                         "satellite_id": satellite_id,
                         "new_state": current_state,
+                        "last_message": current_last_message,
                         "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S")
                     })
                     print(f"State changed: {satellite_id} -> {current_state}")

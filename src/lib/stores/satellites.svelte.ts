@@ -23,11 +23,12 @@ class SatellitesStore {
 		this.satellites = satellites;
 	}
 
-	updateSatelliteState(id: string, newState: StateType) {
-		const satellite = this.satellites.find((s) => s.id === id);
-		if (satellite) {
-			satellite.state = newState;
-		}
+	updateSatelliteState(id: string, newState: StateType, newLastMessage?: string) {
+		this.satellites = this.satellites.map((satellite) =>
+			satellite.id === id
+				? { ...satellite, state: newState, lastMessage: newLastMessage ?? satellite.lastMessage }
+				: satellite
+		);
 	}
 }
 

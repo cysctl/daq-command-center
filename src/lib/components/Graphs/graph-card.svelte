@@ -37,6 +37,8 @@
 	$effect(() => {
 		if (satelliteOptions.length > 0 && !satelliteOptions.includes(selectedOption)) {
 			selectedOption = satelliteOptions[0] || '';
+		} else if (satelliteOptions.length === 0) {
+			selectedOption = '';
 		}
 	});
 
@@ -104,7 +106,7 @@
 		if (!chartContainer) return;
 
 		chart = echarts.init(chartContainer);
-		chart.setOption(getChartOption(chartData, color));
+		chart.setOption(getChartOption(chartData, color), true);
 
 		tick().then(() => chart?.resize());
 
@@ -120,7 +122,7 @@
 	});
 
 	$effect(() => {
-		chart?.setOption(getChartOption(chartData, color));
+		chart?.setOption(getChartOption(chartData, color), true);
 	});
 </script>
 

@@ -40,7 +40,7 @@
 </script>
 
 <div
-	class="my-4 flex-1 overflow-y-auto rounded-md border border-border bg-secondary/10 p-2 font-mono text-sm sm:p-4"
+	class="custom-scrollbar my-4 flex-1 overflow-y-auto rounded-md border border-border bg-secondary/10 p-2 font-mono text-sm sm:p-4"
 >
 	<ul class="flex flex-col gap-1.5 sm:gap-1">
 		{#each filteredLogs as log}

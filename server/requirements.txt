@@ -1,0 +1,2 @@
+websockets==16.0
+python-statemachine==3.0.0

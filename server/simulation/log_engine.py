@@ -46,7 +46,7 @@ async def log_engine(satellites, callback):
             "sender": sat.name,
             "level": level,
             "message": message_text,
-            "timestamp": datetime.utcnow().strftime("%H:%M:%S.%f")[:-3]
+            "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S")
         }
 
         await callback(log_data)

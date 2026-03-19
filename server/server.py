@@ -78,6 +78,18 @@ async def handler(websocket):
                     print(f"Rejected: Invalid transition for {satellite_id} -> {new_state}")
                     await websocket.send(json.dumps({"error": "Invalid FSM transition"}))
 
+            elif message_type == "OPERATOR_LOG":
+                level = data.get("level")
+                log_message = data.get("message")
+
+                await broadcast({
+                    "type": "LOG",
+                    "sender": "Operator",
+                    "level": level,
+                    "message": log_message,
+                    "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S")
+
+                })
     except websockets.exceptions.ConnectionClosed:
         pass
 

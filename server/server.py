@@ -5,9 +5,11 @@ from datetime import datetime, timezone
 
 from core.satellite import Satellite 
 from simulation.engine import engine
+from simulation.log_engine import log_engine
 
 # clients
 connected_clients = set()
+client_log_levels = {}
 
 # satellites
 system_satellites = [
@@ -25,11 +27,22 @@ async def broadcast(msg):
     
     msg_as_json = json.dumps(msg)
 
-    await asyncio.gather(*[client.send(msg_as_json) for client in connected_clients])
+    if msg.get("type") == "LOG":
+        log_level = msg.get("level")
+        tasks = []
+        for client in connected_clients:
+            client_level = client_log_levels.get(client, "ALL")
+            if client_level == "ALL" or client_level == log_level:
+                tasks.append(client.send(msg_as_json))
+        if tasks:
+            await asyncio.gather(*tasks)
+    else:
+        await asyncio.gather(*[client.send(msg_as_json) for client in connected_clients])
 
 async def handler(websocket):
     print("New client connected!")
     connected_clients.add(websocket)
+    client_log_levels[websocket] = "ALL"
 
     # send all satellites to client
     await websocket.send(json.dumps({
@@ -51,6 +64,7 @@ async def handler(websocket):
 
             if message_type == "CHANGE_STATE":
                 satellite_id = data.get("satellite_id")
+                satellite_name = data.get("satellite_name")
                 new_state = data.get("new_state")
                 
                 success = False
@@ -59,33 +73,66 @@ async def handler(websocket):
 
                 for sat in system_satellites:
                     if sat.id == satellite_id: # find correct satellite
+                        satellite_name = sat.name
                         success = sat.process_cmd(new_state) # process through fsm
                         current_state = sat.state()
                         current_last_message = sat.last_message
                         break
                 
                 if success:
+                    timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
+                    
                     await broadcast({
                         "type": "SATELLITE_STATE_UPDATE",
                         "satellite_id": satellite_id,
+                        "satellite_name": satellite_name,
                         "new_state": current_state,
                         "last_message": current_last_message,
-                        "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S")
+                        "timestamp": timestamp
                     })
-                    print(f"State changed: {satellite_id} -> {current_state}")
+
+                    await broadcast({
+                        "type": "LOG",
+                        "sender": "System",
+                        "level": "INFO",
+                        "message": f"Satellite {satellite_name} state changed to {current_state}",
+                        "timestamp": timestamp
+                    })
+                    print(f"State changed: {satellite_name} -> {current_state}")
+                
                 else:
                     print(f"Rejected: Invalid transition for {satellite_id} -> {new_state}")
                     await websocket.send(json.dumps({"error": "Invalid FSM transition"}))
+
+            elif message_type == "OPERATOR_LOG":
+                level = data.get("level")
+                log_message = data.get("message")
+
+                await broadcast({
+                    "type": "LOG",
+                    "sender": "Operator",
+                    "level": level,
+                    "message": log_message,
+                    "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S")
+
+                })
+
+            elif message_type == "CHANGE_LOG_LEVEL":
+                new_level = data.get("level", "ALL")
+                client_log_levels[websocket] = new_level
+                print(f"Client changed log level to {new_level}")
 
     except websockets.exceptions.ConnectionClosed:
         pass
 
     finally:
         connected_clients.remove(websocket)
+        client_log_levels.pop(websocket, None)
         print("Client disconnected!")
 
 async def main():
     asyncio.create_task(engine(system_satellites, broadcast))
+    asyncio.create_task(log_engine(system_satellites, broadcast))
     
     async with websockets.serve(handler, "localhost", 8765):
         print("WebSocket server running on ws://localhost:8765")

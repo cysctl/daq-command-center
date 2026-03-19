@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import LogMessage from './log-message.svelte';
 	import { logsState } from './store.svelte';
 	import { logStore } from '../../stores/logs.svelte.ts';
@@ -13,9 +14,20 @@
 			return matchesLevel && matchesSearch && matchesSender;
 		})
 	);
+
+	let container: HTMLDivElement;
+
+	$effect(() => {
+		if (filteredLogs.length && container) {
+			tick().then(() => {
+				container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+			});
+		}
+	});
 </script>
 
 <div
+	bind:this={container}
 	class="custom-scrollbar my-4 flex-1 overflow-y-auto rounded-md border border-border bg-secondary/10 p-2 font-mono text-sm sm:p-4"
 >
 	{#if filteredLogs.length === 0}

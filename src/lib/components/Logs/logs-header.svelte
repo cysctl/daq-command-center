@@ -23,7 +23,7 @@
 		<NetworkLogLevel />
 		<button
 			onclick={() => logStore.clear()}
-			class="flex items-center justify-center rounded-md border border-border p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+			class="flex cursor-pointer items-center justify-center rounded-md border border-border p-2 text-muted-foreground hover:bg-border"
 			title="Clear Logs"
 		>
 			<Trash2 size={16} />

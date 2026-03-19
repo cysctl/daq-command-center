@@ -15,7 +15,6 @@ client_log_levels = {}
 system_satellites = [
     # alpha-1 is enviro sensor. I will get temperature and pressure data from it
     Satellite("ALPHA-1", "Environment Monitor", "EnviroSensor"),
-
     # beta-2 is power supply. I will get voltage data from it
     Satellite("BETA-2", "Main Power Supply", "PowerSupply"),
 ]

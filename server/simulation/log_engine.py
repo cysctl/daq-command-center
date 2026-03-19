@@ -1,12 +1,12 @@
 import asyncio
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 
 async def log_engine(satellites, callback):
     while True:
         await asyncio.sleep(random.uniform(2.0, 5.0))
         
-        active_sats = [sat for sat in satellites if sat.state not in ["NEW", "DEAD"]]
+        active_sats = [sat for sat in satellites if sat.state() not in ["new", "dead"]]
         
         if not active_sats:
             continue
@@ -50,3 +50,14 @@ async def log_engine(satellites, callback):
         }
 
         await callback(log_data)
+
+        # if ERROR log then transition satellite to ERROR state
+        if level == "ERROR" and sat.state() in ["init", "orbit", "run"]:
+            sat.process_cmd("ERROR")
+            await callback({
+                "type": "SATELLITE_STATE_UPDATE",
+                "satellite_id": sat.id,
+                "new_state": sat.state(),
+                "last_message": sat.last_message,
+                "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S")
+            })

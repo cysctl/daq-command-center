@@ -93,7 +93,7 @@ async def handler(websocket):
 
                     await broadcast({
                         "type": "LOG",
-                        "sender": "SYSTEM",
+                        "sender": "System",
                         "level": "INFO",
                         "message": f"Satellite {satellite_name} state changed to {current_state}",
                         "timestamp": timestamp

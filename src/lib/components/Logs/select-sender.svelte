@@ -5,6 +5,7 @@
 
 	let senderOptions = $derived([
 		'All',
+		'System',
 		'Operator',
 		...satellitesStore.satellites.map((s) => s.name)
 	]);

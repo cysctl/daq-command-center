@@ -7,6 +7,8 @@ export class WebSocketStore {
 	isConnected = $state(false);
 	isConnecting = $state(false);
 	error = $state<string | null>(null);
+	clientId = $state<string>('-');
+	heartbeat = $state<string>('-');
 
 	connect(host: string, port: string) {
 		if (this.ws) {
@@ -31,6 +33,9 @@ export class WebSocketStore {
 				try {
 					const data = JSON.parse(event.data);
 					if (data.type === 'sync' && Array.isArray(data.satellites)) {
+						if (data.client_id) {
+							this.clientId = data.client_id;
+						}
 						const mappedSatellites = data.satellites.map((s: any) => ({
 							id: s.id,
 							name: s.name,
@@ -53,6 +58,8 @@ export class WebSocketStore {
 
 					} else if (data.type === 'LOG') {
 						logStore.addLog(data.sender, data.level, data.message, data.timestamp);
+					} else if (data.type === 'HEARTBEAT') {
+						this.heartbeat = data.value || '-';
 					}
 				} catch (err) {
 					console.error('Error parsing WebSocket message:', err);

@@ -44,9 +44,10 @@ async def handler(websocket):
     connected_clients.add(websocket)
     client_log_levels[websocket] = "ALL"
 
-    # send all satellites to client
+    client_id = f"CLIENT-{id(websocket)}"
     await websocket.send(json.dumps({
         "type": "sync",
+        "client_id": client_id,
         "satellites": [sat.to_dict() for sat in system_satellites]
     }))
 

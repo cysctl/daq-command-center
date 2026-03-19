@@ -12,6 +12,7 @@ class Satellite:
 
         self.lives = 3
         self.last_message = "Awaiting"
+        self.heartbeat = "3000ms"
         self.created_at = datetime.now().isoformat()
 
     
@@ -92,7 +93,8 @@ class Satellite:
             "type": self.type,
             "state": self.state(),
             "lives": self.lives,
-            "last_message": self.last_message
+            "last_message": self.last_message,
+            "heartbeat": self.heartbeat
         }
     
     

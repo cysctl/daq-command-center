@@ -1,6 +1,7 @@
 import asyncio
 import websockets
 import json
+import uuid
 from datetime import datetime, timezone
 
 from core.satellite import Satellite 
@@ -11,13 +12,15 @@ from simulation.log_engine import log_engine
 connected_clients = set()
 client_log_levels = {}
 
+def generate_id():
+    return str(uuid.uuid4())
+
 # satellites
 system_satellites = [
-    # alpha-1 is enviro sensor. I will get temperature and pressure data from it
-    Satellite("ALPHA-1", "Environment Monitor", "EnviroSensor"),
-
-    # beta-2 is power supply. I will get voltage data from it
-    Satellite("BETA-2", "Main Power Supply", "PowerSupply"),
+    # this is enviro sensor. I will get temperature and pressure data from it
+    Satellite(generate_id(), "Environment Monitor", "EnviroSensor"),
+    # this is power supply. I will get voltage data from it
+    Satellite(generate_id(), "Main Power Supply", "PowerSupply"),
 ]
 
 async def broadcast(msg):
@@ -44,9 +47,10 @@ async def handler(websocket):
     connected_clients.add(websocket)
     client_log_levels[websocket] = "ALL"
 
-    # send all satellites to client
+    client_id = f"CLIENT-{id(websocket)}"
     await websocket.send(json.dumps({
         "type": "sync",
+        "client_id": client_id,
         "satellites": [sat.to_dict() for sat in system_satellites]
     }))
 

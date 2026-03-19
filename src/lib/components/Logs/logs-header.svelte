@@ -3,8 +3,9 @@
 	import NetworkLogLevel from './network-log-level.svelte';
 	import Search from './search.svelte';
 	import SelectSender from './select-sender.svelte';
+	import { logStore } from '../../stores/logs.svelte.ts';
 
-	import { Terminal } from '@lucide/svelte';
+	import { Terminal, Trash2 } from '@lucide/svelte';
 </script>
 
 <div
@@ -20,5 +21,12 @@
 		<div class="hidden h-6 w-px self-center bg-border sm:block"></div>
 		<SelectSender />
 		<NetworkLogLevel />
+		<button
+			onclick={() => logStore.clear()}
+			class="flex cursor-pointer items-center justify-center rounded-md border border-border p-2 text-muted-foreground hover:bg-border"
+			title="Clear Logs"
+		>
+			<Trash2 size={16} />
+		</button>
 	</div>
 </div>

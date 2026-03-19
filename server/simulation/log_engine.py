@@ -54,10 +54,18 @@ async def log_engine(satellites, callback):
         # if ERROR log then transition satellite to ERROR state
         if level == "ERROR" and sat.state() in ["init", "orbit", "run"]:
             sat.process_cmd("ERROR")
+            timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
             await callback({
                 "type": "SATELLITE_STATE_UPDATE",
                 "satellite_id": sat.id,
                 "new_state": sat.state(),
                 "last_message": sat.last_message,
-                "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S")
+                "timestamp": timestamp
+            })
+            await callback({
+                "type": "LOG",
+                "sender": "SYSTEM",
+                "level": "INFO",
+                "message": f"Satellite {sat.id} state changed to ERROR",
+                "timestamp": timestamp
             })

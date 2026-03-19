@@ -64,6 +64,7 @@ async def handler(websocket):
 
             if message_type == "CHANGE_STATE":
                 satellite_id = data.get("satellite_id")
+                satellite_name = data.get("satellite_name")
                 new_state = data.get("new_state")
                 
                 success = False
@@ -72,20 +73,33 @@ async def handler(websocket):
 
                 for sat in system_satellites:
                     if sat.id == satellite_id: # find correct satellite
+                        satellite_name = sat.name
                         success = sat.process_cmd(new_state) # process through fsm
                         current_state = sat.state()
                         current_last_message = sat.last_message
                         break
                 
                 if success:
+                    timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
+                    
                     await broadcast({
                         "type": "SATELLITE_STATE_UPDATE",
                         "satellite_id": satellite_id,
+                        "satellite_name": satellite_name,
                         "new_state": current_state,
                         "last_message": current_last_message,
-                        "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S")
+                        "timestamp": timestamp
                     })
-                    print(f"State changed: {satellite_id} -> {current_state}")
+
+                    await broadcast({
+                        "type": "LOG",
+                        "sender": "SYSTEM",
+                        "level": "INFO",
+                        "message": f"Satellite {satellite_name} state changed to {current_state}",
+                        "timestamp": timestamp
+                    })
+                    print(f"State changed: {satellite_name} -> {current_state}")
+                
                 else:
                     print(f"Rejected: Invalid transition for {satellite_id} -> {new_state}")
                     await websocket.send(json.dumps({"error": "Invalid FSM transition"}))

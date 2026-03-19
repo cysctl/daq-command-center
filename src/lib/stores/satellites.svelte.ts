@@ -15,10 +15,6 @@ export interface Satellite {
 class SatellitesStore {
 	satellites = $state<Satellite[]>([]);
 
-	addSatellite(satellite: Satellite) {
-		this.satellites.push(satellite);
-	}
-
 	setSatellites(satellites: Satellite[]) {
 		this.satellites = satellites;
 	}

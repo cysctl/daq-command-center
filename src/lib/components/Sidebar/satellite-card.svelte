@@ -30,7 +30,6 @@
 	</div>
 
 	<span class="font-mono text-sm text-muted-foreground uppercase">Type: {satellite.type}</span>
-	<span class="font-mono text-sm text-muted-foreground uppercase">ID: {satellite.id}</span>
 
 	<!-- the reason for this format is prettier :/ -->
 	<span class="font-mono text-sm text-muted-foreground uppercase"

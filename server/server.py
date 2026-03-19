@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 from core.satellite import Satellite 
 from simulation.engine import engine
+from simulation.log_engine import log_engine
 
 # clients
 connected_clients = set()
@@ -86,6 +87,7 @@ async def handler(websocket):
 
 async def main():
     asyncio.create_task(engine(system_satellites, broadcast))
+    asyncio.create_task(log_engine(system_satellites, broadcast))
     
     async with websockets.serve(handler, "localhost", 8765):
         print("WebSocket server running on ws://localhost:8765")

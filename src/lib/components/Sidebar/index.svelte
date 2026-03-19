@@ -12,13 +12,13 @@
 </script>
 
 <aside
-	class="fixed inset-y-0 left-0 z-50 flex w-80 flex-col justify-between border-r border-border bg-background p-5 transition-transform duration-300 ease-in-out lg:static lg:z-auto lg:w-auto lg:translate-x-0"
+	class="fixed inset-y-0 left-0 z-50 flex w-80 flex-col justify-between gap-5 overflow-hidden border-r border-border bg-background p-5 transition-transform duration-300 ease-in-out lg:static lg:z-auto lg:h-full lg:w-auto lg:translate-x-0"
 	class:max-lg:-translate-x-full={!open}
 	class:max-lg:translate-x-0={open}
 >
-	<div class="flex flex-col gap-5">
+	<div class="flex flex-1 flex-col gap-5 overflow-hidden">
 		<SidebarHeader satelliteCount={satellitesStore.satellites.length} onclose={closeSidebar} />
-		<div class="flex flex-col gap-7">
+		<div class="custom-scrollbar flex flex-col gap-7 overflow-y-auto pr-2 pb-5">
 			{#each satellitesStore.satellites as satellite (satellite.id)}
 				<SatelliteCard {satellite} />
 			{/each}

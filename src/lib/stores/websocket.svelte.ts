@@ -1,5 +1,6 @@
 import { satellitesStore } from './satellites.svelte.ts';
 import { telemetryStore } from './telemetry.svelte.ts';
+import { logStore } from './logs.svelte.ts';
 
 export class WebSocketStore {
 	ws = $state<WebSocket | null>(null);
@@ -49,6 +50,9 @@ export class WebSocketStore {
 						const satellite = satellitesStore.satellites.find((s) => s.id === data.satellite_id);
 						const name = satellite ? satellite.name : data.satellite_id;
 						telemetryStore.addTelemetry(name, data.metrics);
+
+					} else if (data.type === 'LOG') {
+						logStore.addLog(data.sender, data.level, data.message, data.timestamp);
 					}
 				} catch (err) {
 					console.error('Error parsing WebSocket message:', err);
@@ -61,6 +65,7 @@ export class WebSocketStore {
 				this.ws = null;
 				satellitesStore.setSatellites([]);
 				telemetryStore.clear();
+				logStore.clear();
 				console.log('WebSocket disconnected');
 			};
 

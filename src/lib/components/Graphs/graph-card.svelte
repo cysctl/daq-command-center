@@ -4,17 +4,16 @@
 	import * as echarts from 'echarts';
 	import Select from '../ui/select.svelte';
 	import { satellitesStore } from '../../stores/satellites.svelte.ts';
+	import { telemetryStore } from '../../stores/telemetry.svelte.ts';
 
 	interface Props {
 		title: string;
 		icon: Component<{ size: number }>;
-		value: number;
 		unit: string;
 		color: string;
-		data: number[];
 	}
 
-	let { title, icon: Icon, value, unit, color, data }: Props = $props();
+	let { title, icon: Icon, unit, color }: Props = $props();
 
 	let chartContainer: HTMLDivElement;
 	let chart: echarts.ECharts | undefined;
@@ -40,6 +39,14 @@
 			selectedOption = satelliteOptions[0] || '';
 		}
 	});
+
+	let chartData = $derived(
+		selectedOption && telemetryStore.data[selectedOption]?.[title.toLowerCase()]
+			? telemetryStore.data[selectedOption][title.toLowerCase()]
+			: []
+	);
+
+	let displayValue = $derived(chartData.length > 0 ? chartData[chartData.length - 1] : null);
 
 	function getChartOption(seriesData: number[], seriesColor: string): echarts.EChartsOption {
 		return {
@@ -97,7 +104,7 @@
 		if (!chartContainer) return;
 
 		chart = echarts.init(chartContainer);
-		chart.setOption(getChartOption(data, color));
+		chart.setOption(getChartOption(chartData, color));
 
 		tick().then(() => chart?.resize());
 
@@ -113,7 +120,7 @@
 	});
 
 	$effect(() => {
-		chart?.setOption(getChartOption(data, color));
+		chart?.setOption(getChartOption(chartData, color));
 	});
 </script>
 
@@ -134,7 +141,9 @@
 
 	<div>
 		<div class="flex items-baseline gap-1">
-			<span class="text-4xl font-semibold tracking-tight tabular-nums">{value}</span>
+			<span class="text-4xl font-semibold tracking-tight tabular-nums">
+				{displayValue !== null ? displayValue : '--'}
+			</span>
 			<span class="text-lg text-muted-foreground">{unit}</span>
 		</div>
 

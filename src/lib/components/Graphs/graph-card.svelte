@@ -19,9 +19,27 @@
 	let chartContainer: HTMLDivElement;
 	let chart: echarts.ECharts | undefined;
 
-	let selectedOption = $state('Overview');
+	let satelliteOptions = $derived(
+		satellitesStore.satellites
+			.filter((s) => {
+				const t = title.toLowerCase();
+				if (t.includes('temperature') || t.includes('pressure')) {
+					return s.type === 'EnviroSensor';
+				} else if (t.includes('voltage') || t.includes('power')) {
+					return s.type === 'PowerSupply';
+				}
+				return true;
+			})
+			.map((s) => s.name)
+	);
 
-	let satelliteOptions = $derived(['Overview', ...satellitesStore.satellites.map((s) => s.name)]);
+	let selectedOption = $state('');
+
+	$effect(() => {
+		if (satelliteOptions.length > 0 && !satelliteOptions.includes(selectedOption)) {
+			selectedOption = satelliteOptions[0] || '';
+		}
+	});
 
 	function getChartOption(seriesData: number[], seriesColor: string): echarts.EChartsOption {
 		return {

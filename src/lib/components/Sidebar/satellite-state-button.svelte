@@ -4,10 +4,12 @@
 	let {
 		state,
 		isActive = false,
+		isDisabled = false,
 		onclick
 	}: {
 		state: StateType;
 		isActive?: boolean;
+		isDisabled?: boolean;
 		onclick?: () => void;
 	} = $props();
 
@@ -34,9 +36,12 @@
 
 <button
 	{onclick}
-	class="w-full cursor-pointer rounded-xl border-2 py-1 font-mono text-[0.8rem] font-semibold transition-colors active:scale-95 {isActive
+	disabled={isDisabled || isActive}
+	class="w-full rounded-xl border-2 py-1 font-mono text-[0.8rem] font-semibold transition-colors {isActive
 		? activeStyles[state]
-		: inactiveStyles[state]}"
+		: inactiveStyles[state]} {isDisabled
+		? 'cursor-not-allowed opacity-30'
+		: 'cursor-pointer active:scale-95'}"
 >
 	{state}
 </button>

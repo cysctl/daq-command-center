@@ -9,7 +9,17 @@
 
 	let currentState: StateType = $derived(satellite.state);
 
-	let availableStates: StateType[] = ['INIT', 'ORBIT', 'RUN', 'ERROR'];
+	let availableStates: StateType[] = ['INIT', 'ORBIT', 'RUN', 'SAFE'];
+
+	const allowedTransitions: Record<StateType, StateType[]> = {
+		NEW: ['INIT'],
+		INIT: ['ORBIT', 'SAFE'],
+		ORBIT: ['INIT', 'RUN', 'SAFE'],
+		RUN: ['ORBIT', 'SAFE'],
+		SAFE: ['INIT'],
+		ERROR: ['INIT'],
+		DEAD: []
+	};
 </script>
 
 <div class="flex flex-col gap-2 rounded-lg border border-border p-3">
@@ -37,6 +47,7 @@
 			<SatelliteStateButton
 				{state}
 				isActive={state === currentState}
+				isDisabled={!allowedTransitions[currentState].includes(state) && state !== currentState}
 				onclick={() => {
 					satellitesStore.updateSatelliteState(satellite.id, state);
 				}}

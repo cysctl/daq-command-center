@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Settings, X, Plug } from '@lucide/svelte';
+	import { Settings, X, Plug, Unplug, CircleCheck, CircleX, LoaderCircle } from '@lucide/svelte';
 	import { fade, scale } from 'svelte/transition';
+	import { wsStore } from '$lib/stores/websocket.svelte';
 
 	let isOpen = $state(false);
 	let host = $state('localhost');
@@ -73,7 +74,8 @@
 								id="host"
 								type="text"
 								bind:value={host}
-								class="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+								disabled={wsStore.isConnected || wsStore.isConnecting}
+								class="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 							/>
 						</div>
 
@@ -83,7 +85,8 @@
 								id="port"
 								type="text"
 								bind:value={port}
-								class="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+								disabled={wsStore.isConnected || wsStore.isConnecting}
+								class="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 							/>
 						</div>
 					</div>
@@ -92,16 +95,43 @@
 						<p class="mb-1 text-[10px] font-medium tracking-wider text-muted-foreground uppercase">
 							Full URL
 						</p>
-						<code class="text-sm font-semibold text-blue-500">ws://{host + ':' + port}</code>
+						<code class="text-sm font-semibold text-blue-500">ws://{host}:{port}</code>
 					</div>
 
-					<div class="pt-2">
-						<button
-							class="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-background focus:outline-none active:scale-95"
-						>
-							<Plug size={17} />
-							Connect
-						</button>
+					<div class="flex items-center gap-3 pt-2">
+						{#if !wsStore.isConnected}
+							<button
+								class="flex cursor-pointer items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-background focus:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+								onclick={() => wsStore.connect(host, port)}
+								disabled={wsStore.isConnecting}
+							>
+								{#if wsStore.isConnecting}
+									<LoaderCircle class="animate-spin" size={17} />
+									Testing...
+								{:else}
+									<Plug size={17} />
+									Connect
+								{/if}
+							</button>
+							{#if wsStore.error && !wsStore.isConnecting}
+								<span class="flex items-center gap-1.5 text-sm font-medium text-red-500">
+									<CircleX size={17} />
+									Failed to connect to ws://{host}:{port}
+								</span>
+							{/if}
+						{:else}
+							<button
+								class="flex cursor-pointer items-center gap-2 rounded-md bg-red-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-600 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-background focus:outline-none active:scale-95"
+								onclick={() => wsStore.disconnect()}
+							>
+								<Unplug size={17} />
+								Disconnect
+							</button>
+							<span class="flex items-center gap-1.5 text-sm font-medium text-green-500">
+								<CircleCheck size={17} />
+								Successfully connected to ws://{host}:{port}
+							</span>
+						{/if}
 					</div>
 				</div>
 			</div>

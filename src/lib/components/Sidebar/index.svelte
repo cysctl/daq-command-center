@@ -1,7 +1,6 @@
 <script lang="ts">
 	import SidebarHeader from './sidebar-header.svelte';
 	import SatelliteCard from './satellite-card.svelte';
-	import QuickActionButtons from './quick-action-buttons.svelte';
 	import RunIdentifier from './run-identifier.svelte';
 	import { satellitesStore } from '../../stores/satellites.svelte.ts';
 
@@ -19,7 +18,6 @@
 >
 	<div class="flex flex-col gap-5">
 		<SidebarHeader satelliteCount={satellitesStore.satellites.length} onclose={closeSidebar} />
-		<QuickActionButtons />
 		<div class="flex flex-col gap-7">
 			{#each satellitesStore.satellites as satellite (satellite.id)}
 				<SatelliteCard {satellite} />

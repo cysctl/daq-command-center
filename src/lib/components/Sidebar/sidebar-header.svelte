@@ -9,7 +9,7 @@
 	let { satelliteCount, onclose }: Props = $props();
 </script>
 
-<div class="flex items-center justify-between">
+<div class="flex items-center justify-between gap-10">
 	<div class="flex items-center gap-2">
 		<Satellite size={17} class="text-muted-foreground" />
 		<span class="text-sm font-semibold tracking-wider text-muted-foreground uppercase"

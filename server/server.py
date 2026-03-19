@@ -4,14 +4,18 @@ import json
 from datetime import datetime, timezone
 
 from core.satellite import Satellite 
+from simulation.engine import engine
 
 # clients
 connected_clients = set()
 
 # satellites
 system_satellites = [
-    Satellite("ALPHA-1", "Pixel Tracker", "EudaqWriter"),
-    Satellite("BETA-2", "Muon Detector", "RandomTransmitter")
+    # alpha-1 is enviro sensor. I will get temperature and pressure data from it
+    Satellite("ALPHA-1", "Environment Monitor", "EnviroSensor"),
+
+    # beta-2 is power supply. I will get voltage data from it
+    Satellite("BETA-2", "Main Power Supply", "PowerSupply"),
 ]
 
 async def broadcast(msg):
@@ -81,6 +85,8 @@ async def handler(websocket):
         print("Client disconnected!")
 
 async def main():
+    asyncio.create_task(engine(system_satellites, broadcast))
+    
     async with websockets.serve(handler, "localhost", 8765):
         print("WebSocket server running on ws://localhost:8765")
         await asyncio.Future() # forever

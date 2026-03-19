@@ -1,4 +1,5 @@
 import { satellitesStore } from './satellites.svelte.ts';
+import { telemetryStore } from './telemetry.svelte.ts';
 
 export class WebSocketStore {
 	ws = $state<WebSocket | null>(null);
@@ -39,9 +40,15 @@ export class WebSocketStore {
 							lives: s.lives?.toString() || '-'
 						}));
 						satellitesStore.setSatellites(mappedSatellites);
+
 					} else if (data.type === 'SATELLITE_STATE_UPDATE') {
 						const newState = data.new_state ? data.new_state.toUpperCase() : 'INIT';
 						satellitesStore.updateSatelliteState(data.satellite_id, newState, data.last_message);
+
+					} else if (data.type === 'TELEMETRY' && data.satellite_id && data.metrics) {
+						const satellite = satellitesStore.satellites.find((s) => s.id === data.satellite_id);
+						const name = satellite ? satellite.name : data.satellite_id;
+						telemetryStore.addTelemetry(name, data.metrics);
 					}
 				} catch (err) {
 					console.error('Error parsing WebSocket message:', err);
@@ -53,6 +60,7 @@ export class WebSocketStore {
 				this.isConnecting = false;
 				this.ws = null;
 				satellitesStore.setSatellites([]);
+				telemetryStore.clear();
 				console.log('WebSocket disconnected');
 			};
 

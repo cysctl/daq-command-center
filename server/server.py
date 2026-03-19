@@ -60,7 +60,7 @@ async def handler(websocket):
                 
                 if success:
                     await broadcast({
-                        "type": "DEVICE_STATE_UPDATE",
+                        "type": "SATELLITE_STATE_UPDATE",
                         "satellite_id": satellite_id,
                         "new_state": current_state,
                         "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S")

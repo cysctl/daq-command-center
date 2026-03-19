@@ -1,3 +1,5 @@
+import { satellitesStore } from './satellites.svelte.ts';
+
 export class WebSocketStore {
 	ws = $state<WebSocket | null>(null);
 	isConnected = $state(false);
@@ -23,10 +25,34 @@ export class WebSocketStore {
 				console.log(`Connected to ${url}`);
 			};
 
+			this.ws.onmessage = (event) => {
+				try {
+					const data = JSON.parse(event.data);
+					if (data.type === 'sync' && Array.isArray(data.satellites)) {
+						const mappedSatellites = data.satellites.map((s: any) => ({
+							id: s.id,
+							name: s.name,
+							type: s.type,
+							state: s.state ? s.state.toUpperCase() : 'INIT',
+							lastMessage: s.last_message || s.lastMessage || '-',
+							heartbeat: s.heartbeat || '-',
+							lives: s.lives?.toString() || '-'
+						}));
+						satellitesStore.setSatellites(mappedSatellites);
+					} else if (data.type === 'SATELLITE_STATE_UPDATE') {
+						const newState = data.new_state ? data.new_state.toUpperCase() : 'INIT';
+						satellitesStore.updateSatelliteState(data.satellite_id, newState, data.last_message);
+					}
+				} catch (err) {
+					console.error('Error parsing WebSocket message:', err);
+				}
+			};
+
 			this.ws.onclose = () => {
 				this.isConnected = false;
 				this.isConnecting = false;
 				this.ws = null;
+				satellitesStore.setSatellites([]);
 				console.log('WebSocket disconnected');
 			};
 

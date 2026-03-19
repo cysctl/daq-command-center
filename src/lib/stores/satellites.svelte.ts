@@ -1,3 +1,5 @@
+// i will clean here later
+
 import type { StateType } from '../components/ui/state.svelte';
 
 export interface Satellite {
@@ -11,27 +13,22 @@ export interface Satellite {
 }
 
 class SatellitesStore {
-	satellites = $state<Satellite[]>([
-		{
-			id: 'sat-1',
-			name: 'Satellite 1',
-			state: 'INIT',
-			type: '-',
-			lastMessage: '-',
-			heartbeat: '-',
-			lives: '-'
-		}
-	]);
+	satellites = $state<Satellite[]>([]);
 
 	addSatellite(satellite: Satellite) {
 		this.satellites.push(satellite);
 	}
 
-	updateSatelliteState(id: string, newState: StateType) {
-		const satellite = this.satellites.find((s) => s.id === id);
-		if (satellite) {
-			satellite.state = newState;
-		}
+	setSatellites(satellites: Satellite[]) {
+		this.satellites = satellites;
+	}
+
+	updateSatelliteState(id: string, newState: StateType, newLastMessage?: string) {
+		this.satellites = this.satellites.map((satellite) =>
+			satellite.id === id
+				? { ...satellite, state: newState, lastMessage: newLastMessage ?? satellite.lastMessage }
+				: satellite
+		);
 	}
 }
 

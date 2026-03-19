@@ -52,6 +52,7 @@ export class WebSocketStore {
 				this.isConnected = false;
 				this.isConnecting = false;
 				this.ws = null;
+				satellitesStore.setSatellites([]);
 				console.log('WebSocket disconnected');
 			};
 

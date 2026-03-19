@@ -58,6 +58,16 @@ class Satellite:
                     self.fsm.start()
                     transition_occurred = True
 
+            elif cmd == "SAFE":
+                if old_state in ["init", "orbit", "run"]:
+                    self.fsm.rule_violated()
+                    transition_occurred = True
+
+            elif cmd == "ERROR":
+                if old_state in ["init", "orbit", "run"]:
+                    self.fsm.hardware_error()
+                    transition_occurred = True
+
             if not transition_occurred:
                 raise ValueError("Invalid FSM transition!")
 

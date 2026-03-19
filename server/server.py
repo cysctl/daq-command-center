@@ -9,6 +9,7 @@ from simulation.log_engine import log_engine
 
 # clients
 connected_clients = set()
+client_log_levels = {}
 
 # satellites
 system_satellites = [
@@ -26,11 +27,22 @@ async def broadcast(msg):
     
     msg_as_json = json.dumps(msg)
 
-    await asyncio.gather(*[client.send(msg_as_json) for client in connected_clients])
+    if msg.get("type") == "LOG":
+        log_level = msg.get("level")
+        tasks = []
+        for client in connected_clients:
+            client_level = client_log_levels.get(client, "ALL")
+            if client_level == "ALL" or client_level == log_level:
+                tasks.append(client.send(msg_as_json))
+        if tasks:
+            await asyncio.gather(*tasks)
+    else:
+        await asyncio.gather(*[client.send(msg_as_json) for client in connected_clients])
 
 async def handler(websocket):
     print("New client connected!")
     connected_clients.add(websocket)
+    client_log_levels[websocket] = "ALL"
 
     # send all satellites to client
     await websocket.send(json.dumps({
@@ -90,11 +102,18 @@ async def handler(websocket):
                     "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S")
 
                 })
+
+            elif message_type == "CHANGE_LOG_LEVEL":
+                new_level = data.get("level", "ALL")
+                client_log_levels[websocket] = new_level
+                print(f"Client changed log level to {new_level}")
+
     except websockets.exceptions.ConnectionClosed:
         pass
 
     finally:
         connected_clients.remove(websocket)
+        client_log_levels.pop(websocket, None)
         print("Client disconnected!")
 
 async def main():

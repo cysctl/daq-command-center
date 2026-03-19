@@ -1,10 +1,19 @@
 <script lang="ts">
 	import Select from '../ui/select.svelte';
+	import { wsStore } from '../../stores/websocket.svelte.ts';
 
 	let selectedOption = $state('ALL');
 
-	// I will replace with actual log level options
-	let levelOptions = ['ALL', 'INFO', 'WARNING', 'ERROR'];
+	let levelOptions = ['ALL', 'INFO', 'WARN', 'ERROR'];
+
+	$effect(() => {
+		if (wsStore.isConnected) {
+			wsStore.send({
+				type: 'CHANGE_LOG_LEVEL',
+				level: selectedOption
+			});
+		}
+	});
 </script>
 
 <Select

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import State from '../ui/state.svelte';
 	import SatelliteStateButton from './satellite-state-button.svelte';
-	import { satellitesStore, type Satellite } from '../../stores/satellites.svelte.ts';
+	import { type Satellite } from '../../stores/satellites.svelte.ts';
+	import { wsStore } from '../../stores/websocket.svelte.ts';
 
 	import type { StateType } from '../ui/state.svelte';
 
@@ -49,7 +50,11 @@
 				isActive={state === currentState}
 				isDisabled={!allowedTransitions[currentState].includes(state) && state !== currentState}
 				onclick={() => {
-					satellitesStore.updateSatelliteState(satellite.id, state);
+					wsStore.send({
+						type: 'CHANGE_STATE',
+						satellite_id: satellite.id,
+						new_state: state
+					});
 				}}
 			/>
 		{/each}

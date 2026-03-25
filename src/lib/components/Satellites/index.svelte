@@ -12,7 +12,7 @@
 		<span>satellites ({satellitesStore.satellites.length})</span>
 	</span>
 
-	<div class="flex-1">
+	<div class="relative flex-1 overflow-x-auto">
 		<SatellitesTable />
 	</div>
 </section>

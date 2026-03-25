@@ -11,7 +11,7 @@
 			: 'bg-red-500'}"
 	></div>
 
-	<span class="hidden lg:block">
+	<span class="hidden text-sm lg:block">
 		{connStatus === 'connected' ? 'Connected' : 'Disconnected'}
 	</span>
 </div>

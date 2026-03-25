@@ -1,0 +1,33 @@
+<table>
+	<thead>
+		<tr>
+			<th>Type</th>
+			<th>Name</th>
+			<th>State</th>
+			<th>Last Message</th>
+			<th>Heartbeat</th>
+			<th>Lives</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Sputnik</td>
+			<td>TestSatellite1</td>
+			<td>new</td>
+			<td>Waiting..</td>
+			<td>500ms</td>
+			<td>3</td>
+			<td>Test</td>
+		</tr>
+		<tr>
+			<td>Sputnik</td>
+			<td>TestSatellite1</td>
+			<td>new</td>
+			<td>Waiting..</td>
+			<td>500ms</td>
+			<td>3</td>
+			<td>Test</td>
+		</tr>
+	</tbody>
+</table>

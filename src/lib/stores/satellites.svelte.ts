@@ -8,6 +8,7 @@ export interface Satellite {
 	state: StateType;
 	type: string;
 	lastMessage: string;
+	lastMessageTime: string;
 	heartbeat: string;
 	lives: string;
 }

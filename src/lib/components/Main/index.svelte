@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Sidebar from '$lib/components/Sidebar/index.svelte';
-	import Graphs from '$lib/components/Graphs/index.svelte';
 	import Logs from '$lib/components/Logs/index.svelte';
 	import { PanelLeft } from '@lucide/svelte';
 
@@ -29,7 +28,6 @@
 	<Sidebar bind:open={sidebarOpen} />
 
 	<div class="flex flex-1 flex-col gap-5 overflow-auto p-5">
-		<Graphs />
 		<Logs />
 	</div>
 </main>

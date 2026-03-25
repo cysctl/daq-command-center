@@ -41,6 +41,7 @@ export class WebSocketStore {
 							type: s.type,
 							state: s.state ? s.state.toUpperCase() : 'INIT',
 							lastMessage: s.last_message || s.lastMessage || '-',
+							lastMessageTime: s.last_message_time || s.lastMessageTime || '-',
 							heartbeat: s.heartbeat || '-',
 							lives: s.lives?.toString() || '-'
 						}));
@@ -48,7 +49,7 @@ export class WebSocketStore {
 
 					} else if (data.type === 'SATELLITE_STATE_UPDATE') {
 						const newState = data.new_state ? data.new_state.toUpperCase() : 'INIT';
-						satellitesStore.updateSatelliteState(data.satellite_id, newState, data.last_message);
+						satellitesStore.updateSatelliteState(data.satellite_id, newState, data.last_message, data.timestamp);
 
 					} else if (data.type === 'LOG') {
 						logStore.addLog(data.sender, data.level, data.message, data.timestamp);

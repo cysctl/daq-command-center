@@ -12,6 +12,7 @@ class Satellite:
 
         self.lives = 3
         self.last_message = "Awaiting"
+        self.last_message_time = "-"
         self.heartbeat = "3000ms"
         self.created_at = datetime.now().isoformat()
 
@@ -74,10 +75,12 @@ class Satellite:
 
             new_state = self.state()
             self.last_message = f"Transitioned to {new_state}"
+            self.last_message_time = datetime.now().strftime("%H:%M:%S")
             return True
         
         except Exception:
             self.last_message = "Invalid FSM transition!"
+            self.last_message_time = datetime.now().strftime("%H:%M:%S")
             return False
 
     def kill(self):
@@ -85,6 +88,7 @@ class Satellite:
             self.fsm.connection_lost()
             self.lives = 0
             self.last_message = "Connection lost!"
+            self.last_message_time = datetime.now().strftime("%H:%M:%S")
 
     def to_dict(self):
         return {
@@ -94,6 +98,7 @@ class Satellite:
             "state": self.state(),
             "lives": self.lives,
             "last_message": self.last_message,
+            "last_message_time": self.last_message_time,
             "heartbeat": self.heartbeat
         }
     

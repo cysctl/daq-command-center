@@ -2,6 +2,14 @@
 	import { Sun, Moon } from '@lucide/svelte';
 
 	let theme: 'light' | 'dark' = $state('dark');
+
+	$effect(() => {
+		if (theme == 'dark') {
+			document.documentElement.classList.add('dark');
+		} else {
+			document.documentElement.classList.remove('dark');
+		}
+	});
 </script>
 
 <button

@@ -44,6 +44,12 @@ class Satellite:
                 if old_state in ["new", "init"]:
                     self.fsm.initialize()
                     transition_occurred = True
+                elif old_state == "safe":
+                    self.fsm.recover_safe()
+                    transition_occurred = True
+                elif old_state == "error":
+                    self.fsm.recover_error()
+                    transition_occurred = True
 
             elif cmd == "LAUNCH":
                 if old_state == "init":
@@ -104,7 +110,6 @@ class Satellite:
             return False
 
     def complete_transition(self):
-        """Complete a transitional state (e.g. initializing -> INIT)."""
         current = self.state()
         method_name = TRANSITION_COMPLETIONS.get(current)
         if method_name:

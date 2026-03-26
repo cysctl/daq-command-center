@@ -51,8 +51,8 @@
 		INIT: ['Initialize', 'Launch', 'Shutdown'],
 		ORBIT: ['Land', 'Start'],
 		RUN: ['Stop'],
-		SAFE: ['Shutdown'],
-		ERROR: ['Shutdown']
+		SAFE: ['Initialize', 'Shutdown'],
+		ERROR: ['Initialize', 'Shutdown']
 	};
 
 	function isEnabled(button: string): boolean {

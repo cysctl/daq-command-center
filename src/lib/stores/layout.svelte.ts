@@ -1,7 +1,7 @@
 export type SplitDirection = 'vertical' | 'horizontal';
 
 class LayoutStore {
-	splitDirection = $state<SplitDirection>('vertical');
+	splitDirection = $state<SplitDirection>('horizontal');
 
 	toggleSplitDirection() {
 		this.splitDirection = this.splitDirection === 'vertical' ? 'horizontal' : 'vertical';

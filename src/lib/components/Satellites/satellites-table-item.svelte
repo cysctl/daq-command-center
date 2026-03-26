@@ -27,7 +27,7 @@
 	<td class="font-mono text-sm text-muted-foreground">{type}</td>
 	<td class="text-sm font-medium">{name}</td>
 	<td>
-		<State {state} />
+		<State {state} isTransitionState={false} />
 	</td>
 	<td>
 		<div class="flex flex-col">

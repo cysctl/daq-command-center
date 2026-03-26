@@ -3,7 +3,14 @@
 	// I can remove some states or add new states
 	export type StateType = 'NEW' | 'INIT' | 'ORBIT' | 'RUN' | 'SAFE' | 'ERROR' | 'DEAD';
 
-	let { state }: { state: StateType } = $props();
+	type Props = {
+		state: StateType;
+		isTransitionState: boolean;
+	};
+
+	let { state, isTransitionState }: Props = $props();
+
+	import { LoaderCircle } from '@lucide/svelte';
 
 	const stateStyles: Record<StateType, string> = {
 		NEW: 'bg-neutral-800 text-neutral-200 border-neutral-600',
@@ -17,9 +24,15 @@
 </script>
 
 <div
-	class="inline-flex items-center rounded-lg px-2 py-1.5 font-mono text-sm leading-none {stateStyles[
+	class="inline-flex items-center rounded-xl border px-3 py-1.5 font-mono text-xs leading-none {stateStyles[
 		state
 	]}"
 >
-	{state}
+	{#if isTransitionState}
+		<LoaderCircle class="mr-2 h-3 w-3 animate-spin" />
+	{/if}
+
+	<span>
+		{state}
+	</span>
 </div>

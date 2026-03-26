@@ -75,6 +75,12 @@ class Satellite:
                     self.fsm.hardware_error()
                     transition_occurred = True
 
+            elif cmd == "SHUTDOWN":
+                if old_state != "dead":
+                    self.fsm.connection_lost()
+                    self.lives = 0
+                    transition_occurred = True
+
             if not transition_occurred:
                 raise ValueError("Invalid FSM transition!")
 

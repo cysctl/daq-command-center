@@ -3,9 +3,11 @@
 	import type { StateType } from '../ui/state.svelte';
 	import { Ellipsis } from '@lucide/svelte';
 	import { layoutStore } from '$lib/stores/layout.svelte';
+	import { wsStore } from '$lib/stores/websocket.svelte';
 	import { scale } from 'svelte/transition';
 
 	interface SatellitesTableItemProps {
+		id: string;
 		type: string;
 		name: string;
 		state: StateType;
@@ -16,6 +18,7 @@
 	}
 
 	let {
+		id,
 		type,
 		name,
 		state: currentState,
@@ -33,6 +36,14 @@
 
 	function closePopup() {
 		showPopup = false;
+	}
+
+	function sendCommand(command: string) {
+		wsStore.send({
+			type: 'CHANGE_STATE',
+			satellite_id: id,
+			new_state: command.toUpperCase()
+		});
 	}
 
 	let buttons: string[] = ['Initialize', 'Launch', 'Land', 'Start', 'Stop', 'Shutdown'];
@@ -57,6 +68,7 @@
 			<div class="flex items-center justify-end gap-2">
 				{#each buttons as button}
 					<button
+						onclick={() => sendCommand(button)}
 						class="cursor-pointer rounded-lg px-2 py-1 text-sm text-muted-foreground transition-colors select-none hover:bg-border active:scale-95"
 						>{button}</button
 					>
@@ -87,7 +99,10 @@
 							<li class="w-full">
 								<button
 									class="w-full cursor-pointer px-4 py-2 text-left text-sm text-card-foreground transition-colors outline-none hover:bg-border focus:bg-border"
-									onclick={closePopup}>{button}</button
+									onclick={() => {
+										sendCommand(button);
+										closePopup();
+									}}>{button}</button
 								>
 							</li>
 						{/each}

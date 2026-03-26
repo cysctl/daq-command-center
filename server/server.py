@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 from core.satellite import Satellite 
 # from simulation.engine import engine
-from simulation.log_engine import log_engine
+from simulation.event_engine import event_engine
 
 # clients
 connected_clients = set()
@@ -17,10 +17,8 @@ def generate_id():
 
 # satellites
 system_satellites = [
-    # this is enviro sensor. I will get temperature and pressure data from it
-    Satellite(generate_id(), "Environment Monitor", "EnviroSensor"),
-    # this is power supply. I will get voltage data from it
-    Satellite(generate_id(), "Main Power Supply", "PowerSupply"),
+    Satellite(generate_id(), "TestSatellite1", "Sputnik"),
+    Satellite(generate_id(), "TestSatellite2", "Sputnik"),
 ]
 
 TRANSITION_DELAY = 1.5  # delay (in seconds)
@@ -199,7 +197,7 @@ async def handler(websocket):
 async def main():
     # I don't want to any data from satellites
     # asyncio.create_task(engine(system_satellites, broadcast))
-    asyncio.create_task(log_engine(system_satellites, broadcast))
+    asyncio.create_task(event_engine(system_satellites, broadcast))
     
     async with websockets.serve(handler, "localhost", 8765):
         print("WebSocket server running on ws://localhost:8765")

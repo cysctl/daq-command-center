@@ -97,48 +97,78 @@ async def handler(websocket):
                 satellite_name = data.get("satellite_name")
                 new_state = data.get("new_state")
 
-                success = False
-                sat_ref = None
+                # shutdown is handled separately — removes satellite from list
+                if new_state == "SHUTDOWN":
+                    sat_ref = None
+                    for sat in system_satellites:
+                        if sat.id == satellite_id:
+                            sat_ref = sat
+                            break
 
-                for sat in system_satellites:
-                    if sat.id == satellite_id: # find correct satellite
-                        satellite_name = sat.name
-                        success = sat.process_cmd(new_state) # process through fsm
-                        sat_ref = sat
-                        break
+                    if sat_ref and sat_ref.state() in ["new", "init", "error"]:
+                        satellite_name = sat_ref.name
+                        system_satellites.remove(sat_ref)
+                        timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
 
-                if success and sat_ref:
-                    timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
-                    current_state = sat_ref.state()
+                        await broadcast({
+                            "type": "SATELLITE_REMOVED",
+                            "satellite_id": satellite_id
+                        })
 
-                    # broadcast transitional state
-                    await broadcast({
-                        "type": "SATELLITE_STATE_UPDATE",
-                        "satellite_id": satellite_id,
-                        "satellite_name": satellite_name,
-                        "new_state": current_state,
-                        "last_message": sat_ref.last_message,
-                        "timestamp": timestamp
-                    })
-
-                    await broadcast({
-                        "type": "LOG",
-                        "sender": "System",
-                        "level": "INFO",
-                        "message": f"Satellite {satellite_name} state changed to {current_state}",
-                        "timestamp": timestamp
-                    })
-                    print(f"State changed: {satellite_name} -> {current_state}")
-
-                    # if in a transitional state, complete after delay
-                    if sat_ref.is_transitioning():
-                        asyncio.create_task(
-                            complete_transition_after_delay(sat_ref, satellite_id, satellite_name)
-                        )
+                        await broadcast({
+                            "type": "LOG",
+                            "sender": "System",
+                            "level": "WARNING",
+                            "message": f"Shutting down satellite {satellite_name}",
+                            "timestamp": timestamp
+                        })
+                        print(f"Satellite removed: {satellite_name}")
+                    else:
+                        await websocket.send(json.dumps({"error": "Cannot shutdown satellite in current state"}))
 
                 else:
-                    print(f"Rejected: Invalid transition for {satellite_id} -> {new_state}")
-                    await websocket.send(json.dumps({"error": "Invalid FSM transition"}))
+                    success = False
+                    sat_ref = None
+
+                    for sat in system_satellites:
+                        if sat.id == satellite_id: # find correct satellite
+                            satellite_name = sat.name
+                            success = sat.process_cmd(new_state) # process through fsm
+                            sat_ref = sat
+                            break
+
+                    if success and sat_ref:
+                        timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
+                        current_state = sat_ref.state()
+
+                        # broadcast transitional state
+                        await broadcast({
+                            "type": "SATELLITE_STATE_UPDATE",
+                            "satellite_id": satellite_id,
+                            "satellite_name": satellite_name,
+                            "new_state": current_state,
+                            "last_message": sat_ref.last_message,
+                            "timestamp": timestamp
+                        })
+
+                        await broadcast({
+                            "type": "LOG",
+                            "sender": "System",
+                            "level": "INFO",
+                            "message": f"Satellite {satellite_name} state changed to {current_state}",
+                            "timestamp": timestamp
+                        })
+                        print(f"State changed: {satellite_name} -> {current_state}")
+
+                        # if in a transitional state, complete after delay
+                        if sat_ref.is_transitioning():
+                            asyncio.create_task(
+                                complete_transition_after_delay(sat_ref, satellite_id, satellite_name)
+                            )
+
+                    else:
+                        print(f"Rejected: Invalid transition for {satellite_id} -> {new_state}")
+                        await websocket.send(json.dumps({"error": "Invalid FSM transition"}))
 
             elif message_type == "OPERATOR_LOG":
                 level = data.get("level")

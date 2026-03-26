@@ -49,11 +49,10 @@
 	const validCommands: Record<string, string[]> = {
 		NEW: ['Initialize', 'Shutdown'],
 		INIT: ['Launch', 'Shutdown'],
-		ORBIT: ['Land', 'Start', 'Shutdown'],
-		RUN: ['Stop', 'Shutdown'],
-		SAFE: ['Shutdown'],
-		ERROR: ['Shutdown'],
-		DEAD: []
+		ORBIT: ['Land', 'Start'],
+		RUN: ['Stop'],
+		SAFE: [],
+		ERROR: ['Shutdown']
 	};
 
 	function isEnabled(button: string): boolean {

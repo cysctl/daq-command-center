@@ -6,7 +6,6 @@
 		| 'RUN'
 		| 'SAFE'
 		| 'ERROR'
-		| 'DEAD'
 		| 'INITIALIZING'
 		| 'LAUNCHING'
 		| 'LANDING'
@@ -49,8 +48,7 @@
 		ORBIT: 'bg-state-orbit/20 text-state-orbit border-state-orbit/50',
 		RUN: 'bg-state-run/20 text-state-run border-state-run/50',
 		SAFE: 'bg-state-safe/20 text-state-safe border-state-safe/50',
-		ERROR: 'bg-state-error/20 text-state-error border-state-error/50',
-		DEAD: 'bg-state-dead/20 text-state-dead border-state-dead/50 opacity-80'
+		ERROR: 'bg-state-error/20 text-state-error border-state-error/50'
 	};
 
 	const styleKey = $derived(transitionStyleMap[state] ?? state);

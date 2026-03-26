@@ -9,8 +9,6 @@ class FSM(StateMachine):
     run = State(name="RUN")
     safe = State(name="SAFE")
     error = State(name="ERROR")
-    dead = State(name="DEAD", final=True)
-
     # transitional states
     initializing = State(name="initializing")
     launching = State(name="launching")
@@ -49,7 +47,3 @@ class FSM(StateMachine):
     hardware_error = run.to(error) | orbit.to(error) | init.to(error)
     recover_error = error.to(init)
 
-    connection_lost = (
-        new.to(dead) | init.to(dead) | orbit.to(dead) |
-        run.to(dead) | safe.to(dead) | error.to(dead)
-    )

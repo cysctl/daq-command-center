@@ -28,10 +28,10 @@
 
 <div
 	bind:this={container}
-	class="custom-scrollbar my-4 flex-1 overflow-y-auto rounded-md border border-border bg-secondary/10 p-2 font-mono text-sm sm:p-4"
+	class="custom-scrollbar my-4 flex-1 overflow-y-auto rounded-xl border border-border bg-secondary/10 p-2 font-mono text-sm sm:p-4"
 >
 	{#if filteredLogs.length === 0}
-		<p class="py-8 text-center text-muted-foreground">No log messages.</p>
+		<p class="py-8 text-center text-lg text-muted-foreground">No log messages.</p>
 	{:else}
 		<ul class="flex flex-col gap-1.5 sm:gap-1">
 			{#each filteredLogs as log}

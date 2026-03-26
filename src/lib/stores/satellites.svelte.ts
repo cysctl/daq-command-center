@@ -8,6 +8,7 @@ export interface Satellite {
 	state: StateType;
 	type: string;
 	lastMessage: string;
+	lastMessageTime: string;
 	heartbeat: string;
 	lives: string;
 }
@@ -19,10 +20,20 @@ class SatellitesStore {
 		this.satellites = satellites;
 	}
 
-	updateSatelliteState(id: string, newState: StateType, newLastMessage?: string) {
+	updateSatelliteState(
+		id: string,
+		newState: StateType,
+		newLastMessage?: string,
+		newLastMessageTime?: string
+	) {
 		this.satellites = this.satellites.map((satellite) =>
 			satellite.id === id
-				? { ...satellite, state: newState, lastMessage: newLastMessage ?? satellite.lastMessage }
+				? {
+						...satellite,
+						state: newState,
+						lastMessage: newLastMessage ?? satellite.lastMessage,
+						lastMessageTime: newLastMessageTime ?? satellite.lastMessageTime
+					}
 				: satellite
 		);
 	}

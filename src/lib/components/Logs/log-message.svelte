@@ -9,6 +9,7 @@
 
 	let { log }: { log: Log } = $props();
 
+	// I will edit this function later
 	function getLevelColor(level: string) {
 		switch (level) {
 			case 'INFO':

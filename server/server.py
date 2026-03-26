@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime, timezone
 
 from core.satellite import Satellite 
-from simulation.engine import engine
+# from simulation.engine import engine
 from simulation.log_engine import log_engine
 
 # clients
@@ -135,7 +135,8 @@ async def handler(websocket):
         print("Client disconnected!")
 
 async def main():
-    asyncio.create_task(engine(system_satellites, broadcast))
+    # I don't want to any data from satellites
+    # asyncio.create_task(engine(system_satellites, broadcast))
     asyncio.create_task(log_engine(system_satellites, broadcast))
     
     async with websockets.serve(handler, "localhost", 8765):

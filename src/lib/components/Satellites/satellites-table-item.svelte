@@ -48,10 +48,10 @@
 
 	const validCommands: Record<string, string[]> = {
 		NEW: ['Initialize', 'Shutdown'],
-		INIT: ['Launch', 'Shutdown'],
+		INIT: ['Initialize', 'Launch', 'Shutdown'],
 		ORBIT: ['Land', 'Start'],
 		RUN: ['Stop'],
-		SAFE: [],
+		SAFE: ['Shutdown'],
 		ERROR: ['Shutdown']
 	};
 

@@ -18,8 +18,8 @@ class FSM(StateMachine):
     stopping = State(name="stopping")
 
 
-    # initialize: NEW -> initializing -> INIT
-    initialize = new.to(initializing)
+    # initialize: NEW/INIT -> initializing -> INIT
+    initialize = new.to(initializing) | init.to(initializing)
     initialized = initializing.to(init)
 
     # launch: INIT -> launching -> ORBIT
@@ -42,8 +42,8 @@ class FSM(StateMachine):
     stop = run.to(stopping)
     stopped = stopping.to(orbit)
 
-    rule_violated = run.to(safe) | orbit.to(safe) | init.to(safe)
+    rule_violated = new.to(safe) | init.to(safe) | orbit.to(safe) | run.to(safe)
     recover_safe = safe.to(init)
-    hardware_error = run.to(error) | orbit.to(error) | init.to(error)
+    hardware_error = new.to(error) | init.to(error) | orbit.to(error) | run.to(error)
     recover_error = error.to(init)
 

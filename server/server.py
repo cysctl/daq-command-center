@@ -105,7 +105,7 @@ async def handler(websocket):
                             sat_ref = sat
                             break
 
-                    if sat_ref and sat_ref.state() in ["new", "init", "error"]:
+                    if sat_ref and sat_ref.state() in ["new", "init", "safe", "error"]:
                         satellite_name = sat_ref.name
                         system_satellites.remove(sat_ref)
                         timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")

@@ -40,7 +40,7 @@ class Satellite:
             transition_occurred = False
 
             if cmd == "INITIALIZE":
-                if old_state == "new":
+                if old_state in ["new", "init"]:
                     self.fsm.initialize()
                     transition_occurred = True
 
@@ -78,12 +78,12 @@ class Satellite:
                     transition_occurred = True
 
             elif cmd == "SAFE":
-                if old_state in ["init", "orbit", "run"]:
+                if old_state in ["new", "init", "orbit", "run"]:
                     self.fsm.rule_violated()
                     transition_occurred = True
 
             elif cmd == "ERROR":
-                if old_state in ["init", "orbit", "run"]:
+                if old_state in ["new", "init", "orbit", "run"]:
                     self.fsm.hardware_error()
                     transition_occurred = True
 

@@ -8,11 +8,17 @@
 
 	import { Terminal } from '@lucide/svelte';
 
+	import { layoutStore } from '$lib/stores/layout.svelte';
+
 	// I will add the Trash icon later
 	// import { Trash2 } from '@lucide/svelte';
 </script>
 
-<div class="flex items-center justify-between gap-4">
+<div
+	class="flex justify-between gap-4 {layoutStore.splitDirection === 'vertical'
+		? 'w-full flex-col items-start'
+		: 'items-center'}"
+>
 	<span
 		class="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase select-none"
 	>
@@ -20,13 +26,20 @@
 		<span>system logs</span>
 	</span>
 
-	<div class="relative flex items-center gap-3">
-		<Search />
-		<FrontEndFilters />
-		<Divider />
-		<SelectSender />
-		<NetworkLogLevel />
-		<!--
+	<div
+		class="relative flex gap-3 {layoutStore.splitDirection === 'vertical'
+			? 'w-full flex-col items-stretch'
+			: 'items-center'}"
+	>
+		<div>
+			<Search />
+		</div>
+		<div class="flex flex-wrap items-center gap-3">
+			<FrontEndFilters />
+			<Divider />
+			<SelectSender />
+			<NetworkLogLevel />
+			<!--
 		<button
 			onclick={() => logStore.clear()}
 			class="flex cursor-pointer items-center justify-center rounded-md border border-border p-2 text-muted-foreground hover:bg-border"
@@ -35,5 +48,6 @@
 			<Trash2 size={16} />
 		</button>
 		-->
+		</div>
 	</div>
 </div>

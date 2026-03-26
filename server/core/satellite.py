@@ -1,6 +1,16 @@
 from .fsm import FSM
 from datetime import datetime
 
+# maps transitional states to their completion method names
+TRANSITION_COMPLETIONS = {
+    "initializing": "initialized",
+    "launching": "launched",
+    "landing": "landed",
+    "reconfiguring": "reconfigured",
+    "starting": "started",
+    "stopping": "stopped",
+}
+
 class Satellite:
     def __init__(self, id, name, type):
         # satellite informations
@@ -16,17 +26,19 @@ class Satellite:
         self.heartbeat = "3000ms"
         self.created_at = datetime.now().isoformat()
 
-    
+
     def state(self):
         return self.fsm.current_state_value  # return current state
-    
+
+    def is_transitioning(self):
+        return self.state() in TRANSITION_COMPLETIONS
 
     def process_cmd(self, cmd):
         cmd = cmd.upper()
         try:
             old_state = self.state()
             transition_occurred = False
-            
+
             if cmd == "INITIALIZE":
                 if old_state == "new":
                     self.fsm.initialize()
@@ -88,11 +100,23 @@ class Satellite:
             self.last_message = f"Transitioned to {new_state}"
             self.last_message_time = datetime.now().strftime("%H:%M:%S")
             return True
-        
+
         except Exception:
             self.last_message = "Invalid FSM transition!"
             self.last_message_time = datetime.now().strftime("%H:%M:%S")
             return False
+
+    def complete_transition(self):
+        """Complete a transitional state (e.g. initializing -> INIT)."""
+        current = self.state()
+        method_name = TRANSITION_COMPLETIONS.get(current)
+        if method_name:
+            getattr(self.fsm, method_name)()
+            new_state = self.state()
+            self.last_message = f"Transitioned to {new_state}"
+            self.last_message_time = datetime.now().strftime("%H:%M:%S")
+            return True
+        return False
 
     def kill(self):
         if self.state() != "dead":
@@ -112,56 +136,3 @@ class Satellite:
             "last_message_time": self.last_message_time,
             "heartbeat": self.heartbeat
         }
-    
-    
-# tests
-if __name__ == "__main__":
-    satellite = Satellite("", "", "")
-
-    print(
-        satellite.state() # expect NEW
-    )
-
-    satellite.process_cmd("INITIALIZE") # NEW -> initializing -> INIT
-
-    print(
-        satellite.state() # expect INIT
-    )
-
-    satellite.process_cmd("LAUNCH") # INIT -> launching -> ORBIT
-
-    print(
-        satellite.state() # expect ORBIT
-    )
-
-    print(
-        satellite.to_dict()
-    )
-
-    satellite.process_cmd("START") # ORBIT -> starting -> RUN
-
-    print(
-        satellite.state() # expect RUN
-    )
-
-    satellite.process_cmd("STOP") # RUN -> stopping -> ORBIT
-
-    print(
-        satellite.state() # expect ORBIT
-    )
-
-    satellite.process_cmd("LAND") # ORBIT -> landing -> INIT
-
-    print(
-        satellite.state() # expect INIT
-    )
-
-    satellite.kill() # any -> DEAD
-    
-    print(
-        satellite.state()  # expect DEAD
-    )
-
-    print(
-        satellite.to_dict()
-    )

@@ -23,11 +23,13 @@ system_satellites = [
     Satellite(generate_id(), "Main Power Supply", "PowerSupply"),
 ]
 
+TRANSITION_DELAY = 1.5  # delay (in seconds)
+
 async def broadcast(msg):
     # no clients
     if not connected_clients:
         return
-    
+
     msg_as_json = json.dumps(msg)
 
     if msg.get("type") == "LOG":
@@ -41,6 +43,30 @@ async def broadcast(msg):
             await asyncio.gather(*tasks)
     else:
         await asyncio.gather(*[client.send(msg_as_json) for client in connected_clients])
+
+async def complete_transition_after_delay(sat, satellite_id, satellite_name):
+    await asyncio.sleep(TRANSITION_DELAY)
+    if sat.complete_transition():
+        timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
+        final_state = sat.state()
+
+        await broadcast({
+            "type": "SATELLITE_STATE_UPDATE",
+            "satellite_id": satellite_id,
+            "satellite_name": satellite_name,
+            "new_state": final_state,
+            "last_message": sat.last_message,
+            "timestamp": timestamp
+        })
+
+        await broadcast({
+            "type": "LOG",
+            "sender": "System",
+            "level": "INFO",
+            "message": f"Satellite {satellite_name} state changed to {final_state}",
+            "timestamp": timestamp
+        })
+        print(f"Transition completed: {satellite_name} -> {final_state}")
 
 async def handler(websocket):
     print("New client connected!")
@@ -70,28 +96,28 @@ async def handler(websocket):
                 satellite_id = data.get("satellite_id")
                 satellite_name = data.get("satellite_name")
                 new_state = data.get("new_state")
-                
+
                 success = False
-                current_state = None
-                current_last_message = None
+                sat_ref = None
 
                 for sat in system_satellites:
                     if sat.id == satellite_id: # find correct satellite
                         satellite_name = sat.name
                         success = sat.process_cmd(new_state) # process through fsm
-                        current_state = sat.state()
-                        current_last_message = sat.last_message
+                        sat_ref = sat
                         break
-                
-                if success:
+
+                if success and sat_ref:
                     timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
-                    
+                    current_state = sat_ref.state()
+
+                    # broadcast transitional state
                     await broadcast({
                         "type": "SATELLITE_STATE_UPDATE",
                         "satellite_id": satellite_id,
                         "satellite_name": satellite_name,
                         "new_state": current_state,
-                        "last_message": current_last_message,
+                        "last_message": sat_ref.last_message,
                         "timestamp": timestamp
                     })
 
@@ -103,7 +129,13 @@ async def handler(websocket):
                         "timestamp": timestamp
                     })
                     print(f"State changed: {satellite_name} -> {current_state}")
-                
+
+                    # if in a transitional state, complete after delay
+                    if sat_ref.is_transitioning():
+                        asyncio.create_task(
+                            complete_transition_after_delay(sat_ref, satellite_id, satellite_name)
+                        )
+
                 else:
                     print(f"Rejected: Invalid transition for {satellite_id} -> {new_state}")
                     await websocket.send(json.dumps({"error": "Invalid FSM transition"}))

@@ -22,27 +22,27 @@ class FSM(StateMachine):
 
     # initialize: NEW -> initializing -> INIT
     initialize = new.to(initializing)
-    _initialized = initializing.to(init)
+    initialized = initializing.to(init)
 
     # launch: INIT -> launching -> ORBIT
     launch = init.to(launching)
-    _launched = launching.to(orbit)
+    launched = launching.to(orbit)
 
     # land: ORBIT -> landing -> INIT
     land = orbit.to(landing)
-    _landed = landing.to(init)
+    landed = landing.to(init)
 
     # reconfigure: ORBIT -> reconfiguring -> ORBIT
     reconfigure = orbit.to(reconfiguring)
-    _reconfigured = reconfiguring.to(orbit)
+    reconfigured = reconfiguring.to(orbit)
 
     # start: ORBIT -> starting -> RUN
     start = orbit.to(starting)
-    _started = starting.to(run)
+    started = starting.to(run)
 
     # stop: RUN -> stopping -> ORBIT
     stop = run.to(stopping)
-    _stopped = stopping.to(orbit)
+    stopped = stopping.to(orbit)
 
     rule_violated = run.to(safe) | orbit.to(safe) | init.to(safe)
     recover_safe = safe.to(init)
@@ -53,22 +53,3 @@ class FSM(StateMachine):
         new.to(dead) | init.to(dead) | orbit.to(dead) |
         run.to(dead) | safe.to(dead) | error.to(dead)
     )
-
-    # transitional states
-    def on_enter_initializing(self):
-        self._initialized()
-
-    def on_enter_launching(self):
-        self._launched()
-
-    def on_enter_landing(self):
-        self._landed()
-
-    def on_enter_reconfiguring(self):
-        self._reconfigured()
-
-    def on_enter_starting(self):
-        self._started()
-
-    def on_enter_stopping(self):
-        self._stopped()

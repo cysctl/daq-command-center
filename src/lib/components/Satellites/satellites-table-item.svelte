@@ -53,7 +53,7 @@
 	<td class="font-mono text-sm text-muted-foreground">{type}</td>
 	<td class="text-sm font-medium">{name}</td>
 	<td>
-		<State state={currentState} isTransitionState={false} />
+		<State state={currentState} />
 	</td>
 	<td>
 		<div class="flex flex-col">

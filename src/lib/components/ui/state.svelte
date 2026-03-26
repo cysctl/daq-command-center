@@ -1,18 +1,49 @@
 <script lang="ts">
-	// I can edit here later
-	// I can remove some states or add new states
-	export type StateType = 'NEW' | 'INIT' | 'ORBIT' | 'RUN' | 'SAFE' | 'ERROR' | 'DEAD';
+	export type StateType =
+		| 'NEW'
+		| 'INIT'
+		| 'ORBIT'
+		| 'RUN'
+		| 'SAFE'
+		| 'ERROR'
+		| 'DEAD'
+		| 'INITIALIZING'
+		| 'LAUNCHING'
+		| 'LANDING'
+		| 'RECONFIGURING'
+		| 'STARTING'
+		| 'STOPPING';
 
 	type Props = {
 		state: StateType;
-		isTransitionState: boolean;
 	};
 
-	let { state, isTransitionState }: Props = $props();
+	let { state }: Props = $props();
 
 	import { LoaderCircle } from '@lucide/svelte';
 
-	const stateStyles: Record<StateType, string> = {
+	const TRANSITION_STATES: Set<string> = new Set([
+		'INITIALIZING',
+		'LAUNCHING',
+		'LANDING',
+		'RECONFIGURING',
+		'STARTING',
+		'STOPPING'
+	]);
+
+	const isTransitionState = $derived(TRANSITION_STATES.has(state));
+
+	// transitional states use their target state's style
+	const transitionStyleMap: Record<string, string> = {
+		INITIALIZING: 'INIT',
+		LAUNCHING: 'ORBIT',
+		LANDING: 'INIT',
+		RECONFIGURING: 'ORBIT',
+		STARTING: 'RUN',
+		STOPPING: 'ORBIT'
+	};
+
+	const stateStyles: Record<string, string> = {
 		NEW: 'bg-state-new/20 text-state-new border-state-new/50',
 		INIT: 'bg-state-init/20 text-state-init border-state-init/50',
 		ORBIT: 'bg-state-orbit/20 text-state-orbit border-state-orbit/50',
@@ -21,11 +52,13 @@
 		ERROR: 'bg-state-error/20 text-state-error border-state-error/50',
 		DEAD: 'bg-state-dead/20 text-state-dead border-state-dead/50 opacity-80'
 	};
+
+	const styleKey = $derived(transitionStyleMap[state] ?? state);
 </script>
 
 <div
 	class="inline-flex items-center rounded-xl border px-3 py-1.5 font-mono text-xs leading-none {stateStyles[
-		state
+		styleKey
 	]}"
 >
 	{#if isTransitionState}

@@ -1,4 +1,4 @@
-from .fsm import FSM
+from fsm import FSM
 from datetime import datetime
 
 class Satellite:
@@ -27,37 +27,42 @@ class Satellite:
             old_state = self.state()
             transition_occurred = False
             
-            if cmd == "INIT":
+            if cmd == "INITIALIZE":
                 if old_state == "new":
-                    self.fsm.init_system()
+                    self.fsm.initialize()
                     transition_occurred = True
 
-                elif old_state == "safe":
-                    self.fsm.recover_safe()
+            elif cmd == "LAUNCH":
+                if old_state == "init":
+                    self.fsm.launch()
                     transition_occurred = True
 
-                elif old_state == "error":
-                    self.fsm.recover_error()
+            elif cmd == "LAND":
+                if old_state == "orbit":
+                    self.fsm.land()
                     transition_occurred = True
 
-                elif old_state == "orbit":
+            elif cmd == "RECONFIGURE":
+                if old_state == "orbit":
                     self.fsm.reconfigure()
                     transition_occurred = True
 
-
-            elif cmd == "ORBIT":
-                if old_state == "init":
-                    self.fsm.launch_system()
+            elif cmd == "START":
+                if old_state == "orbit":
+                    self.fsm.start()
                     transition_occurred = True
 
-                elif old_state == "run":
+            elif cmd == "STOP":
+                if old_state == "run":
                     self.fsm.stop()
                     transition_occurred = True
 
-
-            elif cmd == "RUN":
-                if old_state == "orbit":
-                    self.fsm.start()
+            elif cmd == "RECOVER":
+                if old_state == "safe":
+                    self.fsm.recover_safe()
+                    transition_occurred = True
+                elif old_state == "error":
+                    self.fsm.recover_error()
                     transition_occurred = True
 
             elif cmd == "SAFE":
@@ -108,31 +113,49 @@ if __name__ == "__main__":
     satellite = Satellite("", "", "")
 
     print(
-        satellite.state() # except new
+        satellite.state() # expect NEW
     )
 
-    satellite.process_cmd("INIT") # new -> init
+    satellite.process_cmd("INITIALIZE") # NEW -> initializing -> INIT
 
     print(
-        satellite.state() # except init
+        satellite.state() # expect INIT
     )
 
-    satellite.process_cmd("ORBIT") # init -> orbit
+    satellite.process_cmd("LAUNCH") # INIT -> launching -> ORBIT
 
     print(
-        satellite.state() # except orbit
+        satellite.state() # expect ORBIT
     )
 
     print(
-        satellite.to_dict() # except {'id': '', 'name': '', 'type': '', 'state': 'orbit', 'lives': 3, 'last_message': 'Transitioned to orbit'}
+        satellite.to_dict()
     )
 
-    satellite.kill() # any -> dead
+    satellite.process_cmd("START") # ORBIT -> starting -> RUN
+
+    print(
+        satellite.state() # expect RUN
+    )
+
+    satellite.process_cmd("STOP") # RUN -> stopping -> ORBIT
+
+    print(
+        satellite.state() # expect ORBIT
+    )
+
+    satellite.process_cmd("LAND") # ORBIT -> landing -> INIT
+
+    print(
+        satellite.state() # expect INIT
+    )
+
+    satellite.kill() # any -> DEAD
     
     print(
-        satellite.state()  # except dead
+        satellite.state()  # expect DEAD
     )
 
     print(
-        satellite.to_dict() # except {'id': '', 'name': '', 'type': '', 'state': 'dead', 'lives': 0, 'last_message': 'Connection lost!'}
+        satellite.to_dict()
     )

@@ -20,6 +20,10 @@ class SatellitesStore {
 		this.satellites = satellites;
 	}
 
+	removeSatellite(id: string) {
+		this.satellites = this.satellites.filter((satellite) => satellite.id !== id);
+	}
+
 	updateSatelliteState(
 		id: string,
 		newState: StateType,

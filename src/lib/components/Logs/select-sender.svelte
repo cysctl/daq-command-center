@@ -3,12 +3,7 @@
 	import { satellitesStore } from '../../stores/satellites.svelte.ts';
 	import { logsState } from './store.svelte.ts';
 
-	let senderOptions = $derived([
-		'All',
-		'System',
-		'Operator',
-		...satellitesStore.satellites.map((s) => s.name)
-	]);
+	let senderOptions = $derived(['All', 'OP', ...satellitesStore.satellites.map((s) => s.name)]);
 </script>
 
 <Select

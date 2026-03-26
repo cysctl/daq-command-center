@@ -20,6 +20,7 @@
 	<tbody class="divide-y divide-border [&_td]:px-3 [&_td]:py-2">
 		{#each satellitesStore.satellites as satellite (satellite.id)}
 			<SatellitesTableItem
+				id={satellite.id}
 				type={satellite.type}
 				name={satellite.name}
 				state={satellite.state}

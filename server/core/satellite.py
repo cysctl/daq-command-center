@@ -1,5 +1,16 @@
+# AI was used as a tool
 from .fsm import FSM
 from datetime import datetime
+
+# maps transitional states to their completion method names
+TRANSITION_COMPLETIONS = {
+    "initializing": "initialized",
+    "launching": "launched",
+    "landing": "landed",
+    "reconfiguring": "reconfigured",
+    "starting": "started",
+    "stopping": "stopped",
+}
 
 class Satellite:
     def __init__(self, id, name, type):
@@ -16,79 +27,98 @@ class Satellite:
         self.heartbeat = "3000ms"
         self.created_at = datetime.now().isoformat()
 
-    
+
     def state(self):
         return self.fsm.current_state_value  # return current state
-    
+
+    def is_transitioning(self):
+        return self.state() in TRANSITION_COMPLETIONS
 
     def process_cmd(self, cmd):
         cmd = cmd.upper()
         try:
             old_state = self.state()
             transition_occurred = False
-            
-            if cmd == "INIT":
-                if old_state == "new":
-                    self.fsm.init_system()
-                    transition_occurred = True
 
+            if cmd == "INITIALIZE":
+                if old_state in ["new", "init"]:
+                    self.fsm.initialize()
+                    transition_occurred = True
                 elif old_state == "safe":
                     self.fsm.recover_safe()
                     transition_occurred = True
-
                 elif old_state == "error":
                     self.fsm.recover_error()
                     transition_occurred = True
 
-                elif old_state == "orbit":
+            elif cmd == "LAUNCH":
+                if old_state == "init":
+                    self.fsm.launch()
+                    transition_occurred = True
+
+            elif cmd == "LAND":
+                if old_state == "orbit":
+                    self.fsm.land()
+                    transition_occurred = True
+
+            elif cmd == "RECONFIGURE":
+                if old_state == "orbit":
                     self.fsm.reconfigure()
                     transition_occurred = True
 
-
-            elif cmd == "ORBIT":
-                if old_state == "init":
-                    self.fsm.launch_system()
-                    transition_occurred = True
-
-                elif old_state == "run":
-                    self.fsm.stop()
-                    transition_occurred = True
-
-
-            elif cmd == "RUN":
+            elif cmd == "START":
                 if old_state == "orbit":
                     self.fsm.start()
                     transition_occurred = True
 
+            elif cmd == "STOP":
+                if old_state == "run":
+                    self.fsm.stop()
+                    transition_occurred = True
+
+            elif cmd == "RECOVER":
+                if old_state == "safe":
+                    self.fsm.recover_safe()
+                    transition_occurred = True
+                elif old_state == "error":
+                    self.fsm.recover_error()
+                    transition_occurred = True
+
             elif cmd == "SAFE":
-                if old_state in ["init", "orbit", "run"]:
+                if old_state in ["new", "init", "orbit", "run"]:
                     self.fsm.rule_violated()
                     transition_occurred = True
 
             elif cmd == "ERROR":
-                if old_state in ["init", "orbit", "run"]:
+                if old_state in ["new", "init", "orbit", "run"]:
                     self.fsm.hardware_error()
                     transition_occurred = True
 
             if not transition_occurred:
-                raise ValueError("Invalid FSM transition!")
+                self.last_message = f"Transition {cmd.lower()} not allowed from {old_state.upper()} state"
+                self.last_message_time = datetime.now().strftime("%H:%M:%S")
+                return False
 
             new_state = self.state()
-            self.last_message = f"Transitioned to {new_state}"
+            self.last_message = f"Transitioned to {new_state.upper()}"
             self.last_message_time = datetime.now().strftime("%H:%M:%S")
             return True
-        
+
         except Exception:
-            self.last_message = "Invalid FSM transition!"
+            self.last_message = f"Transition {cmd.lower()} failed unexpectedly"
             self.last_message_time = datetime.now().strftime("%H:%M:%S")
             return False
 
-    def kill(self):
-        if self.state() != "dead":
-            self.fsm.connection_lost()
-            self.lives = 0
-            self.last_message = "Connection lost!"
+    def complete_transition(self):
+        current = self.state()
+        method_name = TRANSITION_COMPLETIONS.get(current)
+        if method_name:
+            getattr(self.fsm, method_name)()
+            new_state = self.state()
+            self.last_message = f"Transitioned to {new_state.upper()}"
             self.last_message_time = datetime.now().strftime("%H:%M:%S")
+            return True
+        return False
 
     def to_dict(self):
         return {
@@ -101,38 +131,3 @@ class Satellite:
             "last_message_time": self.last_message_time,
             "heartbeat": self.heartbeat
         }
-    
-    
-# tests
-if __name__ == "__main__":
-    satellite = Satellite("", "", "")
-
-    print(
-        satellite.state() # except new
-    )
-
-    satellite.process_cmd("INIT") # new -> init
-
-    print(
-        satellite.state() # except init
-    )
-
-    satellite.process_cmd("ORBIT") # init -> orbit
-
-    print(
-        satellite.state() # except orbit
-    )
-
-    print(
-        satellite.to_dict() # except {'id': '', 'name': '', 'type': '', 'state': 'orbit', 'lives': 3, 'last_message': 'Transitioned to orbit'}
-    )
-
-    satellite.kill() # any -> dead
-    
-    print(
-        satellite.state()  # except dead
-    )
-
-    print(
-        satellite.to_dict() # except {'id': '', 'name': '', 'type': '', 'state': 'dead', 'lives': 0, 'last_message': 'Connection lost!'}
-    )

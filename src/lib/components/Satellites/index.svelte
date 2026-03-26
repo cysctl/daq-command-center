@@ -4,7 +4,7 @@
 	import SatellitesTable from './satellites-table.svelte';
 </script>
 
-<section class="flex min-h-64 flex-2 flex-col gap-5">
+<section class="flex min-h-64 flex-1 flex-col gap-5">
 	<div class="flex items-center justify-between">
 		<SatellitesHeader />
 		<QuickActionButtons />

@@ -9,19 +9,41 @@ class FSM(StateMachine):
     run = State(name="RUN")
     safe = State(name="SAFE")
     error = State(name="ERROR")
-    dead = State(name="DEAD", final=True)
+    # transitional states
+    initializing = State(name="initializing")
+    launching = State(name="launching")
+    landing = State(name="landing")
+    reconfiguring = State(name="reconfiguring")
+    starting = State(name="starting")
+    stopping = State(name="stopping")
 
-    # transitions
-    init_system = new.to(init)
-    launch_system = init.to(orbit)
-    start = orbit.to(run)
-    stop = run.to(orbit)
-    reconfigure = orbit.to(init)
 
-    rule_violated = run.to(safe) | orbit.to(safe) | init.to(safe)
+    # initialize: NEW/INIT -> initializing -> INIT
+    initialize = new.to(initializing) | init.to(initializing)
+    initialized = initializing.to(init)
+
+    # launch: INIT -> launching -> ORBIT
+    launch = init.to(launching)
+    launched = launching.to(orbit)
+
+    # land: ORBIT -> landing -> INIT
+    land = orbit.to(landing)
+    landed = landing.to(init)
+
+    # reconfigure: ORBIT -> reconfiguring -> ORBIT
+    reconfigure = orbit.to(reconfiguring)
+    reconfigured = reconfiguring.to(orbit)
+
+    # start: ORBIT -> starting -> RUN
+    start = orbit.to(starting)
+    started = starting.to(run)
+
+    # stop: RUN -> stopping -> ORBIT
+    stop = run.to(stopping)
+    stopped = stopping.to(orbit)
+
+    rule_violated = new.to(safe) | init.to(safe) | orbit.to(safe) | run.to(safe)
     recover_safe = safe.to(init)
-
-    hardware_error = run.to(error) | orbit.to(error) | init.to(error)
+    hardware_error = new.to(error) | init.to(error) | orbit.to(error) | run.to(error)
     recover_error = error.to(init)
 
-    connection_lost = new.to(dead) | init.to(dead) | orbit.to(dead) | run.to(dead) | safe.to(dead) | error.to(dead)

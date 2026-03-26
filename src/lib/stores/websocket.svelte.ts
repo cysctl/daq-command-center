@@ -46,6 +46,8 @@ export class WebSocketStore {
 							lives: s.lives?.toString() || '-'
 						}));
 						satellitesStore.setSatellites(mappedSatellites);
+					} else if (data.type === 'SATELLITE_REMOVED') {
+						satellitesStore.removeSatellite(data.satellite_id);
 					} else if (data.type === 'SATELLITE_STATE_UPDATE') {
 						const newState = data.new_state ? data.new_state.toUpperCase() : 'INIT';
 						satellitesStore.updateSatelliteState(

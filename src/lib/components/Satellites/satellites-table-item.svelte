@@ -3,9 +3,11 @@
 	import type { StateType } from '../ui/state.svelte';
 	import { Ellipsis } from '@lucide/svelte';
 	import { layoutStore } from '$lib/stores/layout.svelte';
+	import { wsStore } from '$lib/stores/websocket.svelte';
 	import { scale } from 'svelte/transition';
 
 	interface SatellitesTableItemProps {
+		id: string;
 		type: string;
 		name: string;
 		state: StateType;
@@ -16,6 +18,7 @@
 	}
 
 	let {
+		id,
 		type,
 		name,
 		state: currentState,
@@ -35,6 +38,29 @@
 		showPopup = false;
 	}
 
+	function sendCommand(command: string) {
+		wsStore.send({
+			type: 'CHANGE_STATE',
+			satellite_id: id,
+			new_state: command.toUpperCase()
+		});
+	}
+
+	const validCommands: Record<string, string[]> = {
+		NEW: ['Initialize', 'Shutdown'],
+		INIT: ['Initialize', 'Launch', 'Shutdown'],
+		ORBIT: ['Land', 'Start'],
+		RUN: ['Stop'],
+		SAFE: ['Initialize', 'Shutdown'],
+		ERROR: ['Initialize', 'Shutdown']
+	};
+
+	function isEnabled(button: string): boolean {
+		const allowed = validCommands[currentState];
+		if (!allowed) return false; // transitional states — no commands allowed
+		return allowed.includes(button);
+	}
+
 	let buttons: string[] = ['Initialize', 'Launch', 'Land', 'Start', 'Stop', 'Shutdown'];
 </script>
 
@@ -42,7 +68,7 @@
 	<td class="font-mono text-sm text-muted-foreground">{type}</td>
 	<td class="text-sm font-medium">{name}</td>
 	<td>
-		<State state={currentState} isTransitionState={false} />
+		<State state={currentState} />
 	</td>
 	<td>
 		<div class="flex flex-col">
@@ -56,9 +82,13 @@
 		{#if layoutStore.splitDirection === 'horizontal'}
 			<div class="flex items-center justify-end gap-2">
 				{#each buttons as button}
+					{@const enabled = isEnabled(button)}
 					<button
-						class="cursor-pointer rounded-lg px-2 py-1 text-sm text-muted-foreground transition-colors select-none hover:bg-border active:scale-95"
-						>{button}</button
+						onclick={() => sendCommand(button)}
+						disabled={!enabled}
+						class="rounded-lg px-2 py-1 text-sm transition-colors select-none {enabled
+							? 'cursor-pointer text-muted-foreground hover:bg-border active:scale-95'
+							: 'cursor-not-allowed text-muted-foreground/30'}">{button}</button
 					>
 				{/each}
 			</div>
@@ -84,10 +114,17 @@
 						class="absolute right-0 z-50 mt-1 flex min-w-40 origin-top-right flex-col overflow-hidden rounded-xl border border-border bg-card shadow-lg"
 					>
 						{#each buttons as button}
+							{@const enabled = isEnabled(button)}
 							<li class="w-full">
 								<button
-									class="w-full cursor-pointer px-4 py-2 text-left text-sm text-card-foreground transition-colors outline-none hover:bg-border focus:bg-border"
-									onclick={closePopup}>{button}</button
+									disabled={!enabled}
+									class="w-full px-4 py-2 text-left text-sm transition-colors outline-none {enabled
+										? 'cursor-pointer text-card-foreground hover:bg-border focus:bg-border'
+										: 'cursor-not-allowed text-muted-foreground/30'}"
+									onclick={() => {
+										sendCommand(button);
+										closePopup();
+									}}>{button}</button
 								>
 							</li>
 						{/each}

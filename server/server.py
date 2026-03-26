@@ -4,9 +4,8 @@ import json
 import uuid
 from datetime import datetime, timezone
 
-from core.satellite import Satellite 
-# from simulation.engine import engine
-from simulation.log_engine import log_engine
+from core.satellite import Satellite
+from simulation.event_engine import event_engine
 
 # clients
 connected_clients = set()
@@ -17,17 +16,17 @@ def generate_id():
 
 # satellites
 system_satellites = [
-    # this is enviro sensor. I will get temperature and pressure data from it
-    Satellite(generate_id(), "Environment Monitor", "EnviroSensor"),
-    # this is power supply. I will get voltage data from it
-    Satellite(generate_id(), "Main Power Supply", "PowerSupply"),
+    Satellite(generate_id(), "TestSatellite1", "Sputnik"),
+    Satellite(generate_id(), "TestSatellite2", "Sputnik"),
 ]
+
+TRANSITION_DELAY = 1.5  # delay (in seconds)
 
 async def broadcast(msg):
     # no clients
     if not connected_clients:
         return
-    
+
     msg_as_json = json.dumps(msg)
 
     if msg.get("type") == "LOG":
@@ -41,6 +40,30 @@ async def broadcast(msg):
             await asyncio.gather(*tasks)
     else:
         await asyncio.gather(*[client.send(msg_as_json) for client in connected_clients])
+
+async def complete_transition_after_delay(sat, satellite_id, satellite_name):
+    await asyncio.sleep(TRANSITION_DELAY)
+    if sat.complete_transition():
+        timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
+        final_state = sat.state()
+
+        await broadcast({
+            "type": "SATELLITE_STATE_UPDATE",
+            "satellite_id": satellite_id,
+            "satellite_name": satellite_name,
+            "new_state": final_state,
+            "last_message": sat.last_message,
+            "timestamp": timestamp
+        })
+
+        await broadcast({
+            "type": "LOG",
+            "sender": "System",
+            "level": "STATUS",
+            "message": f"New state: {final_state.upper()}",
+            "timestamp": timestamp
+        })
+        print(f"Transition completed: {satellite_name} -> {final_state}")
 
 async def handler(websocket):
     print("New client connected!")
@@ -70,43 +93,102 @@ async def handler(websocket):
                 satellite_id = data.get("satellite_id")
                 satellite_name = data.get("satellite_name")
                 new_state = data.get("new_state")
-                
-                success = False
-                current_state = None
-                current_last_message = None
 
-                for sat in system_satellites:
-                    if sat.id == satellite_id: # find correct satellite
-                        satellite_name = sat.name
-                        success = sat.process_cmd(new_state) # process through fsm
-                        current_state = sat.state()
-                        current_last_message = sat.last_message
-                        break
-                
-                if success:
-                    timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
-                    
-                    await broadcast({
-                        "type": "SATELLITE_STATE_UPDATE",
-                        "satellite_id": satellite_id,
-                        "satellite_name": satellite_name,
-                        "new_state": current_state,
-                        "last_message": current_last_message,
-                        "timestamp": timestamp
-                    })
+                # shutdown is handled separately — removes satellite from list
+                if new_state == "SHUTDOWN":
+                    sat_ref = None
+                    for sat in system_satellites:
+                        if sat.id == satellite_id:
+                            sat_ref = sat
+                            break
 
-                    await broadcast({
-                        "type": "LOG",
-                        "sender": "System",
-                        "level": "INFO",
-                        "message": f"Satellite {satellite_name} state changed to {current_state}",
-                        "timestamp": timestamp
-                    })
-                    print(f"State changed: {satellite_name} -> {current_state}")
-                
+                    if sat_ref and sat_ref.state() in ["new", "init", "safe", "error"]:
+                        satellite_name = sat_ref.name
+                        system_satellites.remove(sat_ref)
+                        timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
+
+                        await broadcast({
+                            "type": "SATELLITE_REMOVED",
+                            "satellite_id": satellite_id
+                        })
+
+                        await broadcast({
+                            "type": "LOG",
+                            "sender": satellite_name,
+                            "level": "STATUS",
+                            "message": "Shutting down satellite",
+                            "timestamp": timestamp
+                        })
+                        print(f"Satellite removed: {satellite_name}")
+                    else:
+                        await websocket.send(json.dumps({"error": "Cannot shutdown satellite in current state"}))
+
                 else:
-                    print(f"Rejected: Invalid transition for {satellite_id} -> {new_state}")
-                    await websocket.send(json.dumps({"error": "Invalid FSM transition"}))
+                    success = False
+                    sat_ref = None
+
+                    for sat in system_satellites:
+                        if sat.id == satellite_id: # find correct satellite
+                            satellite_name = sat.name
+                            success = sat.process_cmd(new_state) # process through fsm
+                            sat_ref = sat
+                            break
+
+                    timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
+
+                    if success and sat_ref:
+                        current_state = sat_ref.state()
+
+                        await broadcast({
+                            "type": "SATELLITE_STATE_UPDATE",
+                            "satellite_id": satellite_id,
+                            "satellite_name": satellite_name,
+                            "new_state": current_state,
+                            "last_message": sat_ref.last_message,
+                            "timestamp": timestamp
+                        })
+
+                        if sat_ref.is_transitioning():
+                            await broadcast({
+                                "type": "LOG",
+                                "sender": satellite_name,
+                                "level": "INFO",
+                                "message": f"Reacting to transition {new_state.lower()}",
+                                "timestamp": timestamp
+                            })
+                            asyncio.create_task(
+                                complete_transition_after_delay(sat_ref, satellite_id, satellite_name)
+                            )
+
+                        else:
+                            await broadcast({
+                                "type": "LOG",
+                                "sender": satellite_name,
+                                "level": "STATUS",
+                                "message": f"New state: {current_state.upper()}",
+                                "timestamp": timestamp
+                            })
+                        print(f"State changed: {satellite_name} -> {current_state}")
+
+                    elif sat_ref:
+                        # transition rejected — broadcast updated last_message + log
+                        await broadcast({
+                            "type": "SATELLITE_STATE_UPDATE",
+                            "satellite_id": satellite_id,
+                            "satellite_name": satellite_name,
+                            "new_state": sat_ref.state(),
+                            "last_message": sat_ref.last_message,
+                            "timestamp": timestamp
+                        })
+
+                        await broadcast({
+                            "type": "LOG",
+                            "sender": "System",
+                            "level": "WARNING",
+                            "message": f"{satellite_name}: {sat_ref.last_message}",
+                            "timestamp": timestamp
+                        })
+                        print(f"Rejected: {satellite_name} -> {sat_ref.last_message}")
 
             elif message_type == "OPERATOR_LOG":
                 level = data.get("level")
@@ -114,7 +196,7 @@ async def handler(websocket):
 
                 await broadcast({
                     "type": "LOG",
-                    "sender": "Operator",
+                    "sender": f"OP",
                     "level": level,
                     "message": log_message,
                     "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S")
@@ -135,9 +217,7 @@ async def handler(websocket):
         print("Client disconnected!")
 
 async def main():
-    # I don't want to any data from satellites
-    # asyncio.create_task(engine(system_satellites, broadcast))
-    asyncio.create_task(log_engine(system_satellites, broadcast))
+    asyncio.create_task(event_engine(system_satellites, broadcast))
     
     async with websockets.serve(handler, "localhost", 8765):
         print("WebSocket server running on ws://localhost:8765")

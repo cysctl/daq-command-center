@@ -4,7 +4,7 @@
 
 	let selectedOption = $state('ALL');
 
-	let levelOptions = ['ALL', 'INFO', 'WARN', 'ERROR'];
+	let levelOptions = ['ALL', 'INFO', 'WARNING', 'STATUS', 'CRITICAL', 'TRACE', 'DEBUG'];
 
 	$effect(() => {
 		if (wsStore.isConnected) {

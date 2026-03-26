@@ -6,7 +6,7 @@
 	let note = $state('');
 	let selectedLevel = $state('INFO');
 
-	let levelOptions = ['INFO', 'WARN'];
+	let levelOptions = ['INFO', 'WARNING', 'STATUS', 'CRITICAL', 'TRACE', 'DEBUG'];
 
 	function sendNote() {
 		if (!note.trim() || !wsStore.isConnected) return;

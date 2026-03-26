@@ -1,3 +1,4 @@
+# AI was used as a tool
 from .fsm import FSM
 from datetime import datetime
 
@@ -88,15 +89,17 @@ class Satellite:
                     transition_occurred = True
 
             if not transition_occurred:
-                raise ValueError("Invalid FSM transition!")
+                self.last_message = f"Transition {cmd.lower()} not allowed from {old_state.upper()} state"
+                self.last_message_time = datetime.now().strftime("%H:%M:%S")
+                return False
 
             new_state = self.state()
-            self.last_message = f"Transitioned to {new_state}"
+            self.last_message = f"Transitioned to {new_state.upper()}"
             self.last_message_time = datetime.now().strftime("%H:%M:%S")
             return True
 
         except Exception:
-            self.last_message = "Invalid FSM transition!"
+            self.last_message = f"Transition {cmd.lower()} failed unexpectedly"
             self.last_message_time = datetime.now().strftime("%H:%M:%S")
             return False
 
@@ -107,7 +110,7 @@ class Satellite:
         if method_name:
             getattr(self.fsm, method_name)()
             new_state = self.state()
-            self.last_message = f"Transitioned to {new_state}"
+            self.last_message = f"Transitioned to {new_state.upper()}"
             self.last_message_time = datetime.now().strftime("%H:%M:%S")
             return True
         return False

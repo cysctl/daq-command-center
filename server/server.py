@@ -135,11 +135,11 @@ async def handler(websocket):
                             sat_ref = sat
                             break
 
+                    timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
+
                     if success and sat_ref:
-                        timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
                         current_state = sat_ref.state()
 
-                        # broadcast transitional state
                         await broadcast({
                             "type": "SATELLITE_STATE_UPDATE",
                             "satellite_id": satellite_id,
@@ -153,20 +153,35 @@ async def handler(websocket):
                             "type": "LOG",
                             "sender": "System",
                             "level": "INFO",
-                            "message": f"Satellite {satellite_name} state changed to {current_state}",
+                            "message": f"Satellite {satellite_name} state changed to {current_state.upper()}",
                             "timestamp": timestamp
                         })
                         print(f"State changed: {satellite_name} -> {current_state}")
 
-                        # if in a transitional state, complete after delay
                         if sat_ref.is_transitioning():
                             asyncio.create_task(
                                 complete_transition_after_delay(sat_ref, satellite_id, satellite_name)
                             )
 
-                    else:
-                        print(f"Rejected: Invalid transition for {satellite_id} -> {new_state}")
-                        await websocket.send(json.dumps({"error": "Invalid FSM transition"}))
+                    elif sat_ref:
+                        # transition rejected — broadcast updated last_message + log
+                        await broadcast({
+                            "type": "SATELLITE_STATE_UPDATE",
+                            "satellite_id": satellite_id,
+                            "satellite_name": satellite_name,
+                            "new_state": sat_ref.state(),
+                            "last_message": sat_ref.last_message,
+                            "timestamp": timestamp
+                        })
+
+                        await broadcast({
+                            "type": "LOG",
+                            "sender": "System",
+                            "level": "WARNING",
+                            "message": f"{satellite_name}: {sat_ref.last_message}",
+                            "timestamp": timestamp
+                        })
+                        print(f"Rejected: {satellite_name} -> {sat_ref.last_message}")
 
             elif message_type == "OPERATOR_LOG":
                 level = data.get("level")

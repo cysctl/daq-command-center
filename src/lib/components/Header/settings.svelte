@@ -54,7 +54,7 @@
 				<h3 class="text-sm font-semibold text-muted-foreground">Connection</h3>
 
 				<div class="space-y-4 rounded-xl border border-border bg-card p-4">
-					<div class="grid grid-cols-1 gap-4 md:grid-cols-[1fr_2fr_1fr]">
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 						<div class="flex flex-col gap-1.5">
 							<label for="protocol" class="text-xs font-medium text-muted-foreground"
 								>Protocol</label
@@ -101,7 +101,7 @@
 					<div class="flex items-center gap-3 pt-2">
 						{#if !wsStore.isConnected}
 							<button
-								class="flex cursor-pointer items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-background focus:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+								class="flex cursor-pointer items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background focus:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
 								onclick={() => wsStore.connect(host, port)}
 								disabled={wsStore.isConnecting}
 							>

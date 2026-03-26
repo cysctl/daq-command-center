@@ -1,4 +1,4 @@
-from fsm import FSM
+from .fsm import FSM
 from datetime import datetime
 
 class Satellite:

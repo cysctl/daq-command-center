@@ -3,6 +3,7 @@
 	import LogMessage from './log-message.svelte';
 	import { logsState } from './store.svelte';
 	import { logStore } from '../../stores/logs.svelte.ts';
+	import { layoutStore } from '$lib/stores/layout.svelte';
 
 	let filteredLogs = $derived(
 		logStore.logs.filter((log) => {
@@ -28,7 +29,10 @@
 
 <div
 	bind:this={container}
-	class="custom-scrollbar my-4 flex-1 overflow-y-auto rounded-xl border border-border bg-secondary/10 p-2 font-mono text-sm sm:p-4"
+	class="custom-scrollbar my-4 flex-1 overflow-y-auto rounded-xl border border-border bg-secondary/10 p-2 font-mono text-sm sm:p-4 {layoutStore.splitDirection ===
+	'horizontal'
+		? 'max-h-44 min-h-44'
+		: ''}"
 >
 	{#if filteredLogs.length === 0}
 		<p class="py-8 text-center text-lg text-muted-foreground">No log messages.</p>

@@ -46,6 +46,22 @@
 		});
 	}
 
+	const validCommands: Record<string, string[]> = {
+		NEW: ['Initialize', 'Shutdown'],
+		INIT: ['Launch', 'Shutdown'],
+		ORBIT: ['Land', 'Start', 'Shutdown'],
+		RUN: ['Stop', 'Shutdown'],
+		SAFE: ['Shutdown'],
+		ERROR: ['Shutdown'],
+		DEAD: []
+	};
+
+	function isEnabled(button: string): boolean {
+		const allowed = validCommands[currentState];
+		if (!allowed) return false; // transitional states — no commands allowed
+		return allowed.includes(button);
+	}
+
 	let buttons: string[] = ['Initialize', 'Launch', 'Land', 'Start', 'Stop', 'Shutdown'];
 </script>
 
@@ -67,10 +83,13 @@
 		{#if layoutStore.splitDirection === 'horizontal'}
 			<div class="flex items-center justify-end gap-2">
 				{#each buttons as button}
+					{@const enabled = isEnabled(button)}
 					<button
 						onclick={() => sendCommand(button)}
-						class="cursor-pointer rounded-lg px-2 py-1 text-sm text-muted-foreground transition-colors select-none hover:bg-border active:scale-95"
-						>{button}</button
+						disabled={!enabled}
+						class="rounded-lg px-2 py-1 text-sm transition-colors select-none {enabled
+							? 'cursor-pointer text-muted-foreground hover:bg-border active:scale-95'
+							: 'cursor-not-allowed text-muted-foreground/30'}">{button}</button
 					>
 				{/each}
 			</div>
@@ -96,9 +115,13 @@
 						class="absolute right-0 z-50 mt-1 flex min-w-40 origin-top-right flex-col overflow-hidden rounded-xl border border-border bg-card shadow-lg"
 					>
 						{#each buttons as button}
+							{@const enabled = isEnabled(button)}
 							<li class="w-full">
 								<button
-									class="w-full cursor-pointer px-4 py-2 text-left text-sm text-card-foreground transition-colors outline-none hover:bg-border focus:bg-border"
+									disabled={!enabled}
+									class="w-full px-4 py-2 text-left text-sm transition-colors outline-none {enabled
+										? 'cursor-pointer text-card-foreground hover:bg-border focus:bg-border'
+										: 'cursor-not-allowed text-muted-foreground/30'}"
 									onclick={() => {
 										sendCommand(button);
 										closePopup();

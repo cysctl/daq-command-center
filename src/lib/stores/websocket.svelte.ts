@@ -13,7 +13,7 @@ export class WebSocketStore {
 		if (this.ws) {
 			this.ws.close();
 		}
-		
+
 		this.isConnecting = true;
 		this.error = null;
 
@@ -46,11 +46,14 @@ export class WebSocketStore {
 							lives: s.lives?.toString() || '-'
 						}));
 						satellitesStore.setSatellites(mappedSatellites);
-
 					} else if (data.type === 'SATELLITE_STATE_UPDATE') {
 						const newState = data.new_state ? data.new_state.toUpperCase() : 'INIT';
-						satellitesStore.updateSatelliteState(data.satellite_id, newState, data.last_message, data.timestamp);
-
+						satellitesStore.updateSatelliteState(
+							data.satellite_id,
+							newState,
+							data.last_message,
+							data.timestamp
+						);
 					} else if (data.type === 'LOG') {
 						logStore.addLog(data.sender, data.level, data.message, data.timestamp);
 					} else if (data.type === 'HEARTBEAT') {
@@ -87,13 +90,13 @@ export class WebSocketStore {
 		}
 	}
 
-    send(data: any) {
-        if (this.ws && this.isConnected) {
-            this.ws.send(typeof data === 'string' ? data : JSON.stringify(data));
-        } else {
-            console.warn('Cannot send message, WebSocket is not connected.');
-        }
-    }
+	send(data: any) {
+		if (this.ws && this.isConnected) {
+			this.ws.send(typeof data === 'string' ? data : JSON.stringify(data));
+		} else {
+			console.warn('Cannot send message, WebSocket is not connected.');
+		}
+	}
 }
 
 export const wsStore = new WebSocketStore();

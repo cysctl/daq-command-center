@@ -18,7 +18,7 @@ class LogStore {
 			sender,
 			message
 		});
-		
+
 		// store max 1000 logs
 		if (this.logs.length > 1000) {
 			this.logs.shift();

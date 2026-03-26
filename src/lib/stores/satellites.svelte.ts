@@ -20,10 +20,20 @@ class SatellitesStore {
 		this.satellites = satellites;
 	}
 
-	updateSatelliteState(id: string, newState: StateType, newLastMessage?: string, newLastMessageTime?: string) {
+	updateSatelliteState(
+		id: string,
+		newState: StateType,
+		newLastMessage?: string,
+		newLastMessageTime?: string
+	) {
 		this.satellites = this.satellites.map((satellite) =>
 			satellite.id === id
-				? { ...satellite, state: newState, lastMessage: newLastMessage ?? satellite.lastMessage, lastMessageTime: newLastMessageTime ?? satellite.lastMessageTime }
+				? {
+						...satellite,
+						state: newState,
+						lastMessage: newLastMessage ?? satellite.lastMessage,
+						lastMessageTime: newLastMessageTime ?? satellite.lastMessageTime
+					}
 				: satellite
 		);
 	}

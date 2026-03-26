@@ -23,10 +23,13 @@
 	--color-border: lab(88% 0 0);
 	--color-input: lab(88% 0 0);
 	--color-ring: lab(12% 0 0);
-	--color-state-init: lab(71.1681% 11.7208 71.0541);
-	--color-state-orbit: lab(52.5446% -2.04957 -60.1708);
-	--color-state-run: lab(61.7444% -56.3779 49.029);
-	--color-state-error: lab(45.5382% 69.8881 46.2994);
+	--color-state-new: lab(40% 0 0);
+	--color-state-init: lab(50% 15 65);
+	--color-state-orbit: lab(38% -2 -55);
+	--color-state-run: lab(42% -50 40);
+	--color-state-safe: lab(52% 18 60);
+	--color-state-error: lab(40% 65 42);
+	--color-state-dead: lab(30% 42 22);
 }
 
 /* dark theme */
@@ -50,6 +53,13 @@
 	--color-border: lab(20% 0 0);
 	--color-input: lab(16% 0 0);
 	--color-ring: lab(35% 0 0);
+	--color-state-new: lab(70% 0 0);
+	--color-state-init: lab(82% 8 75);
+	--color-state-orbit: lab(72% -5 -55);
+	--color-state-run: lab(78% -50 45);
+	--color-state-safe: lab(78% 14 68);
+	--color-state-error: lab(65% 60 40);
+	--color-state-dead: lab(50% 45 25);
 }
 
 body {

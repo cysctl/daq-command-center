@@ -66,8 +66,8 @@ async def event_engine(satellites, broadcast):
 
         await broadcast({
             "type": "LOG",
-            "sender": "System",
-            "level": "INFO",
-            "message": f"Satellite {sat.name} state changed to {sat.state()}",
+            "sender": sat.name,
+            "level": "STATUS",
+            "message": f"New state: {sat.state().upper()}",
             "timestamp": timestamp
         })

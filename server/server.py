@@ -4,8 +4,7 @@ import json
 import uuid
 from datetime import datetime, timezone
 
-from core.satellite import Satellite 
-# from simulation.engine import engine
+from core.satellite import Satellite
 from simulation.event_engine import event_engine
 
 # clients
@@ -60,8 +59,8 @@ async def complete_transition_after_delay(sat, satellite_id, satellite_name):
         await broadcast({
             "type": "LOG",
             "sender": "System",
-            "level": "INFO",
-            "message": f"Satellite {satellite_name} state changed to {final_state}",
+            "level": "STATUS",
+            "message": f"New state: {final_state.upper()}",
             "timestamp": timestamp
         })
         print(f"Transition completed: {satellite_name} -> {final_state}")
@@ -115,9 +114,9 @@ async def handler(websocket):
 
                         await broadcast({
                             "type": "LOG",
-                            "sender": "System",
-                            "level": "WARNING",
-                            "message": f"Shutting down satellite {satellite_name}",
+                            "sender": satellite_name,
+                            "level": "STATUS",
+                            "message": "Shutting down satellite",
                             "timestamp": timestamp
                         })
                         print(f"Satellite removed: {satellite_name}")
@@ -149,19 +148,27 @@ async def handler(websocket):
                             "timestamp": timestamp
                         })
 
-                        await broadcast({
-                            "type": "LOG",
-                            "sender": "System",
-                            "level": "INFO",
-                            "message": f"Satellite {satellite_name} state changed to {current_state.upper()}",
-                            "timestamp": timestamp
-                        })
-                        print(f"State changed: {satellite_name} -> {current_state}")
-
                         if sat_ref.is_transitioning():
+                            await broadcast({
+                                "type": "LOG",
+                                "sender": satellite_name,
+                                "level": "INFO",
+                                "message": f"Reacting to transition {new_state.lower()}",
+                                "timestamp": timestamp
+                            })
                             asyncio.create_task(
                                 complete_transition_after_delay(sat_ref, satellite_id, satellite_name)
                             )
+
+                        else:
+                            await broadcast({
+                                "type": "LOG",
+                                "sender": satellite_name,
+                                "level": "STATUS",
+                                "message": f"New state: {current_state.upper()}",
+                                "timestamp": timestamp
+                            })
+                        print(f"State changed: {satellite_name} -> {current_state}")
 
                     elif sat_ref:
                         # transition rejected — broadcast updated last_message + log
@@ -189,7 +196,7 @@ async def handler(websocket):
 
                 await broadcast({
                     "type": "LOG",
-                    "sender": "Operator",
+                    "sender": f"Operator ({client_id})",
                     "level": level,
                     "message": log_message,
                     "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S")
@@ -210,8 +217,6 @@ async def handler(websocket):
         print("Client disconnected!")
 
 async def main():
-    # I don't want to any data from satellites
-    # asyncio.create_task(engine(system_satellites, broadcast))
     asyncio.create_task(event_engine(system_satellites, broadcast))
     
     async with websockets.serve(handler, "localhost", 8765):

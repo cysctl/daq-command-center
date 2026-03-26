@@ -196,7 +196,7 @@ async def handler(websocket):
 
                 await broadcast({
                     "type": "LOG",
-                    "sender": f"Operator ({client_id})",
+                    "sender": f"OP",
                     "level": level,
                     "message": log_message,
                     "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S")

@@ -19,13 +19,13 @@ When the application starts, the user sees the main control panel. On the top, t
 To start data flow, the user enters host and port information from the settings menu in the top-right corner and sends a WebSocket connection request. If the connection fails, the system shows an error message.
 
 <p align="center">
-<img src="./images/settings-popup/conn_failed.png" alt="Connection Failed">
+<img src="./images/settings-popup/conn_failed_new.png" alt="Connection Failed">
 </p>
 
 If the network parameters are correct and the server is reachable, the interface updates with a success message. After that, the operator can monitor the system from the main screen.
 
 <p align="center">
-<img src="./images/settings-popup/conn_success.png" alt="Connection Success">
+<img src="./images/settings-popup/conn_success_new.png" alt="Connection Success">
 </p>
 
 ### Theme
@@ -84,7 +84,7 @@ To add realism and reflect real-world hardware behavior, six **transitional stat
 Satellites in `SAFE` or `ERROR` states can be recovered back to the `INIT` state using the `Initialize` command.
 
 <p align="center">
-<img src="./images/fsm.png" alt="FSM Architecture">
+<img src="./images/fsm_new.png" alt="FSM Architecture">
 </p>
 
 ### Satellite Table
@@ -128,7 +128,7 @@ Instead of directly selecting a target state (e.g. `INIT`, `ORBIT`, `RUN`), oper
 Invalid commands are automatically disabled based on the satellite's current state. During transitional states, all commands are disabled.
 
 <p align="center">
-<img src="./images/gif/change_state.gif" alt="State Change">
+<img src="./images/gif/change_state_new.gif" alt="State Change">
 </p>
 
 #### Global Control
@@ -165,7 +165,7 @@ Log messages are color-coded by level for quick visual scanning:
 For performance reasons, a maximum of 1000 log entries are stored on screen. When the limit is reached, the oldest entries are removed (FIFO).
 
 <p align="center">
-<img src="./images/gif/system_logs.gif" alt="System Logs">
+<img src="./images/gif/system_logs_new.gif" alt="System Logs">
 </p>
 
 This module includes:
